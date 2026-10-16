@@ -1,0 +1,41 @@
+:root {
+  --bg: #2f8f5b;
+  --fg: #1d4d33;
+  --accent: #ffd34d;
+  --tap: 88px; /* minimale knopmaat voor kindervingers */
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+#app { position: fixed; inset: 0; }
+#world { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+#ui {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  pointer-events: none;
+}
+#ui > * { pointer-events: auto; }
+.big-button {
+  min-width: var(--tap);
+  min-height: var(--tap);
+  padding: 0 32px;
+  border: 0;
+  border-radius: 24px;
+  background: var(--accent);
+  color: var(--fg);
+  font-size: 40px;
+  font-weight: 700;
+  touch-action: manipulation;
+}
