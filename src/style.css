@@ -486,3 +486,97 @@ h1 { margin: 0; font-size: clamp(28px, 4.5vmin, 44px); text-align: center; }
   .stars { font-size: 26px; }
   .scene { font-size: 48px; }
 }
+
+/* ---------- Fase 2: nieuwe opdrachtsoorten ---------- */
+
+.item.gone { opacity: 0.22; filter: grayscale(1); }
+.item.gone::after { content: ''; position: absolute; left: 10%; right: 10%; top: 45%; height: 4px; background: #9a4d00; border-radius: 2px; transform: rotate(-30deg); }
+.items.small .item { font-size: clamp(24px, 3.6vmin, 34px); }
+.items.ghost .item { opacity: 0.45; }
+
+/* Ontbrekend getal: rij van tegels */
+.number-path { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; }
+.path-tile {
+  position: relative;
+  min-width: clamp(64px, 10vmin, 92px);
+  height: clamp(80px, 12vmin, 108px);
+  border-radius: 20px;
+  background: #fff;
+  border: 4px solid #a1662f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.path-tile.gap { border-style: dashed; border-color: var(--accent-dark); background: #fff8d6; animation: pulse 1.6s ease-in-out infinite; }
+.tile-paw { font-size: 22px; opacity: 0.7; }
+.tile-number { font-size: clamp(32px, 5vmin, 48px); font-weight: 900; }
+.plus-one { width: 14px; font-size: 16px; font-weight: 800; color: var(--good); text-align: center; }
+.plus-one.show { width: 34px; }
+
+/* Vergelijken: twee groepjes als grote knoppen */
+.compare-hint { font-size: 64px; line-height: 1; }
+.choices.groups { width: 100%; flex-wrap: nowrap; }
+.choices.groups .choice {
+  flex: 1 1 0;
+  width: auto;
+  height: auto;
+  min-height: 160px;
+  max-width: 420px;
+  padding: 16px;
+  background: #fff;
+  border: 4px solid var(--accent);
+  box-shadow: 0 8px 0 var(--accent-dark);
+}
+.choices.groups .choice.right { background: #e8f5e9; border-color: var(--good); color: var(--fg); }
+.choices.groups .choice.wrong { background: #f1f1f1; border-color: #c4c4c4; }
+.group-choice { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.group-number { font-size: 40px; font-weight: 900; }
+
+/* Ordenen: trap van klein naar groot + tegels */
+.sequence { display: flex; flex-direction: column; align-items: center; gap: var(--gap); width: 100%; }
+.stairs { display: flex; align-items: flex-end; gap: 10px; }
+.stair {
+  width: clamp(72px, 11vmin, 100px);
+  height: calc(70px + var(--h) * 26px);
+  border-radius: 14px 14px 6px 6px;
+  background: #e0e0e0;
+  border: 4px dashed #bdbdbd;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 8px;
+  font-size: clamp(32px, 5vmin, 46px);
+  font-weight: 900;
+}
+.stair.next { border-color: var(--accent-dark); background: #fff8d6; }
+.stair.filled { background: var(--good); border: 4px solid #1b5e20; color: #fff; animation: pop 0.35s ease-out; }
+.choice.tile.used { opacity: 0.15; }
+
+/* Splitshuis */
+.split-house { display: flex; flex-direction: column; align-items: center; }
+.roof {
+  min-width: 300px;
+  padding: 18px 0 6px;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  background: #c0392b;
+  color: #fff;
+  text-align: center;
+  font-size: 44px;
+  font-weight: 900;
+}
+.rooms { margin-top: -4px; }
+.split-house .roof { display: block; }
+.split-house::before { content: none; }
+.rooms { display: flex; gap: 0; border: 4px solid #8d6e63; border-radius: 0 0 16px 16px; background: #fff; }
+.room { min-width: 150px; min-height: 120px; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.room + .room { border-left: 4px solid #8d6e63; }
+.room.unknown { background: #fff8d6; }
+.room-number { font-size: 44px; font-weight: 900; }
+
+/* Tienveld */
+.ten-frame { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 8px; border: 4px solid #8d6e63; border-radius: 16px; background: #fff; }
+.ten-frame .cell { width: clamp(52px, 8vmin, 72px); height: clamp(52px, 8vmin, 72px); border-radius: 10px; display: grid; place-items: center; font-size: clamp(32px, 5vmin, 46px); }
+.ten-frame .cell.full { background: #ffe9c2; }
+.ten-frame .cell.empty { border: 3px dashed #c8a46a; font-size: 24px; font-weight: 800; color: var(--muted); }
+.choices.groups .items.small .item { font-size: clamp(34px, 5.5vmin, 52px); }

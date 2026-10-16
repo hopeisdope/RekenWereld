@@ -12,16 +12,38 @@ export function numberWord(n: number): string {
 
 export const MASCOT = { emoji: '🦉', name: 'Uil Ollie' };
 
-/** De opdracht in woorden; wordt getoond én voorgelezen. */
+/** Voorwerp per thema, voor teksten. */
+const THING: Record<Task['theme'], [string, string]> = {
+  paws: ['voetstap', 'voetstappen'],
+  apples: ['appel', 'appels'],
+  frog: ['steen', 'stenen'],
+};
+
+/** De opdracht in woorden; alleen ondersteuning (klein getoond en optioneel voorgelezen). */
 export function promptText(task: Task): string {
   const [a, b] = task.exercise.operands;
+  const many = THING[task.theme][1];
   switch (task.prompt) {
     case 'count':
-      return 'Hoeveel voetstappen tel je?';
+      return `Hoeveel ${many} tel je?`;
     case 'recognize':
       return `Zoek hetzelfde getal: ${numberWord(a)}.`;
+    case 'build':
+      return `Leg ${numberWord(a)} ${a === 1 ? THING[task.theme][0] : many} in de mand.`;
+    case 'compare':
+      return 'Waar zijn er meer? Tik erop.';
+    case 'order':
+      return 'Tik de getallen van klein naar groot.';
+    case 'missing':
+      return 'Welk getal ontbreekt?';
     case 'add':
-      return 'Hoeveel appels zijn het samen?';
+      return `${a} plus ${b}. Hoeveel ${many} zijn het samen?`;
+    case 'subtract':
+      return `${a} min ${b}. Hoeveel ${many} blijven er over?`;
+    case 'split':
+      return `${numberWord(a)} is ${numberWord(b)} en ...?`;
+    case 'makeTen':
+      return `Hoeveel erbij om tien te maken?`;
     case 'jump':
       return task.exercise.operation === 'add'
         ? `De kikker zit op ${a}. Spring ${numberWord(b)} ${b === 1 ? 'steen' : 'stenen'} vooruit.`
@@ -29,15 +51,27 @@ export function promptText(task: Task): string {
   }
 }
 
-/** Hint na een fout antwoord: vriendelijk en concreet. */
+/** Hint na een fout antwoord; de echte hint is altijd visueel. */
 export function hintText(task: Task): string {
   switch (task.prompt) {
     case 'count':
+    case 'add':
+    case 'subtract':
       return 'Tel ze één voor één. De getallen helpen je.';
     case 'recognize':
       return `Kijk goed naar het bordje: ${numberWord(task.exercise.answer)}.`;
-    case 'add':
-      return 'Tel alle appels samen. De getallen helpen je.';
+    case 'build':
+      return 'Tel mee terwijl je legt.';
+    case 'compare':
+      return 'Tel beide groepjes.';
+    case 'order':
+      return 'Begin met het kleinste getal.';
+    case 'missing':
+      return 'Tel de rij hardop: steeds één verder.';
+    case 'split':
+      return 'Tel de appels die nog verstopt zijn.';
+    case 'makeTen':
+      return 'Tel de lege plekjes.';
     case 'jump':
       return 'Volg de gele stenen en tel de sprongen.';
   }

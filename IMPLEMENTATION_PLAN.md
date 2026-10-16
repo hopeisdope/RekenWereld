@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN — RekenWereld
 
-Status: **Fase 1.5 afgerond** (spelen zonder leesvaardigheid). Laatst bijgewerkt: 2026-10-16.
+Status: **Fase 2 afgerond** (rekenengine en visuele didactiek). Laatst bijgewerkt: 2026-10-16.
 
 ## 1. Uitgangssituatie (fase 0-inventarisatie)
 
@@ -209,7 +209,18 @@ Nog niet geverifieerd: echte deploy op Pages, gedrag op een fysieke iPad.
      visuele hint; na 2 fouten bij ≥ 4 keuzes wijst de hand het antwoord aan.
    - Resultaat: dier + sterren + confetti, grote ▶ (verder), klein 🔁 (opnieuw).
    - Spraak alleen met lokale stemmen; zonder stem blijft de app volledig bruikbaar.
-5. **Fase 2 – bediening uitbreiden**: slepen (Pointer Events), aftrekken in eigen missie,
+5. **Fase 2** ✅ rekenengine en visuele didactiek
+   - `src/math/skills.ts`: configureerbare vaardigheden met niveaus (enige plek met grenzen):
+     herkennen 0–20, tellen, hoeveelheid maken, vergelijken, ordenen, ontbrekend getal,
+     optellen/aftrekken (tot 5/10/20, met of zonder tientalovergang, max. tweede getal),
+     splitsen, aanvullen tot 10. Didactische afleiders (één ernaast, verkeerde bewerking,
+     omgedraaide cijfers, tien ernaast). Ordenen = meerstaps-antwoord (`steps`).
+   - Missies hebben 3 rondes met elk een leerdoel en een geplande volgorde van concreet
+     (voorwerpen) naar abstract (alleen getallen); bij een fout komen de voorwerpen terug.
+   - Nieuwe beelden: telrij met gat, trap (klein → groot), groepjes vergelijken, opeten
+     (aftrekken), splitshuis, tienveld. Voorbeeld per nieuwe soort, ook meerstaps.
+   - ESLint toegevoegd (`npm run lint`, ook in CI).
+6. **Fase 3 – touch-interacties**: herbruikbare knoppen, slepen/aantikken, getallenlijn met stappen.: slepen (Pointer Events), aftrekken in eigen missie,
    Playwright-rooktest (iPad-viewport, touch) in CI.
 6. **Fase 3 – wereld**: canvas-wereldkaart met gebieden, ontgrendelen, animaties, audio.
 7. **Fase 4 – afronding MVP**: ouder-menu, persist-verzoek, testen op iPad en iPad mini, offline-test.

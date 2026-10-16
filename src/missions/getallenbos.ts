@@ -1,91 +1,78 @@
-import { makeAddition, makeChoices, makeCount, makeRecognize, randInt } from '../math/generate';
-import type { Exercise, Rng } from '../math/types';
-import type { Area, Mission, Task } from './types';
+import type { Area, Mission, TaskSpec } from './types';
 
-let counter = 0;
-const nextId = (prefix: string) => `${prefix}-${++counter}`;
-
-const key = (ex: Exercise) => `${ex.operation}:${ex.operands.join(',')}`;
-
-/**
- * Maakt een opgave met `make`, maar probeert opnieuw als die gelijk is aan een
- * eerdere opgave in dezelfde missie, zodat een missie gevarieerd blijft.
+/*
+ * Leerlijnen van Het Getallenbos. Elke missie heeft drie rondes; elke ronde
+ * heeft een eigen leerdoel en loopt van concreet (voorwerpen) naar abstract
+ * (alleen getallen). Niveaus staan in src/math/skills.ts.
  */
-function unique(seen: Set<string>, make: () => Exercise): Exercise {
-  let ex = make();
-  for (let i = 0; i < 20 && seen.has(key(ex)); i++) ex = make();
-  seen.add(key(ex));
-  return ex;
-}
 
-function choiceTask(rng: Rng, prompt: Task['prompt'], exercise: Exercise, min: number, max: number, count: number): Task {
-  return {
-    id: nextId('task'),
-    prompt,
-    interaction: 'choice',
-    exercise,
-    choices: makeChoices(rng, exercise.answer, { count, min, max }),
-  };
-}
+const c = (skill: TaskSpec['skill'], level: number, extra: Partial<TaskSpec> = {}): TaskSpec => ({ skill, level, support: 'concrete', ...extra });
+const a = (skill: TaskSpec['skill'], level: number, extra: Partial<TaskSpec> = {}): TaskSpec => ({ skill, level, support: 'abstract', ...extra });
 
-/** Getallen herkennen en tellen tot 20. */
+/** Getallen herkennen, tellen, telrij, vergelijken en ordenen. */
 export const voetstappen: Mission = {
   id: 'voetstappen',
   areaId: 'getallenbos',
   title: 'De verdwenen voetstappen',
-  goal: 'Tel de voetstappen en zoek de getallen.',
+  goal: 'Tellen, getallen herkennen, de telrij, vergelijken en ordenen tot 20.',
   emoji: '🐾',
-  reward: '🦊',
-  buildTasks(rng) {
-    const seen = new Set<string>();
-    const count = (min: number, max: number) =>
-      choiceTask(rng, 'count', unique(seen, () => makeCount(rng, min, max)), 1, 20, 3);
-    const recognize = (min: number, max: number) =>
-      choiceTask(rng, 'recognize', unique(seen, () => makeRecognize(rng, min, max)), 0, 20, 4);
-    // Van makkelijk naar moeilijker: eerst tot 10, dan tot 20.
-    return [count(3, 8), recognize(1, 10), count(5, 10), recognize(11, 20), count(11, 15), count(12, 20)];
-  },
+  theme: 'paws',
+  rounds: [
+    // 1. Tellen en herkennen tot 10
+    { reward: '🦊', specs: [c('count', 0), c('count', 1), c('recognize', 0), c('count', 1), c('recognize', 0), c('recognize', 0)] },
+    // 2. Tot 20 en de telrij
+    { reward: '🐿️', specs: [c('count', 2), c('recognize', 1), c('missing', 0), c('count', 2), c('missing', 0), a('missing', 1)] },
+    // 3. Vergelijken en ordenen
+    { reward: '🦌', specs: [c('compare', 0), c('compare', 1), c('order', 0), c('compare', 2), a('order', 0), a('order', 1)] },
+  ],
 };
 
-/** Eenvoudige optelsommen tot 10. */
+/** Optellen, aftrekken, splitsen en aanvullen tot 10. */
 export const appelmand: Mission = {
   id: 'appelmand',
   areaId: 'getallenbos',
   title: 'De appelmand',
-  goal: 'Hoeveel appels zitten er samen in de mand?',
+  goal: 'Optellen en aftrekken tot 10, splitsen en aanvullen tot 10.',
   emoji: '🍎',
-  reward: '🦔',
-  buildTasks(rng) {
-    const seen = new Set<string>();
-    const add = (max: number) =>
-      choiceTask(rng, 'add', unique(seen, () => makeAddition(rng, { max, minOperand: 1 })), 0, 10, 3);
-    return [add(5), add(5), add(7), add(8), add(10), add(10)];
-  },
+  theme: 'apples',
+  rounds: [
+    // 1. Optellen met appels, daarna alleen met getallen
+    { reward: '🦔', specs: [c('add', 0), c('add', 0), c('add', 1), c('add', 1), a('add', 1), a('add', 1)] },
+    // 2. Aftrekken (appels opeten)
+    { reward: '🐛', specs: [c('subtract', 0), c('subtract', 0), c('subtract', 1), c('subtract', 1), a('subtract', 1), a('subtract', 1)] },
+    // 3. Splitsen en aanvullen tot 10
+    { reward: '🐞', specs: [c('split', 0), c('split', 1), a('split', 1), c('makeTen', 0), c('makeTen', 1), a('makeTen', 1)] },
+  ],
 };
 
-/** Een sprong van `start` met `jump` stappen vooruit (+) of terug (−) op 0..max. */
-function makeJump(rng: Rng, max: number, direction: 'add' | 'subtract', maxJump: number): Exercise {
-  const jump = randInt(rng, 1, maxJump);
-  const start = direction === 'add' ? randInt(rng, 0, max - jump) : randInt(rng, jump, max);
-  const answer = direction === 'add' ? start + jump : start - jump;
-  return { id: nextId('ex'), operation: direction, operands: [start, jump], answer };
-}
+const line10 = { min: 0, max: 10 };
+const line20 = { min: 0, max: 20 };
+const jump = (skill: 'add' | 'subtract', level: number, maxSecond: number, line: { min: number; max: number }, support: TaskSpec['support'] = 'concrete'): TaskSpec => ({
+  skill,
+  level,
+  prompt: 'jump',
+  interaction: 'numberline',
+  tweak: { min: 1, maxSecond },
+  line,
+  support,
+});
 
-/** Vooruit en terug springen op een getallenlijn van 0 tot 10. */
+/** Vooruit en terug springen op de getallenlijn. */
 export const rivier: Mission = {
   id: 'rivier',
   areaId: 'getallenbos',
   title: 'De rivier oversteken',
-  goal: 'Spring met de kikker over de stenen.',
+  goal: 'Optellen en aftrekken als sprongen op de getallenlijn tot 10 en tot 20.',
   emoji: '🐸',
-  reward: '🦦',
-  buildTasks(rng) {
-    const seen = new Set<string>();
-    const line = { min: 0, max: 10 };
-    const jump = (dir: 'add' | 'subtract', maxJump: number) => unique(seen, () => makeJump(rng, line.max, dir, maxJump));
-    const exercises = [jump('add', 2), jump('add', 3), jump('add', 4), jump('subtract', 2), jump('add', 4), jump('subtract', 3)];
-    return exercises.map((exercise) => ({ id: nextId('task'), prompt: 'jump', interaction: 'numberline', exercise, line }));
-  },
+  theme: 'frog',
+  rounds: [
+    // 1. Vooruit springen tot 10
+    { reward: '🦦', specs: [jump('add', 1, 2, line10), jump('add', 1, 3, line10), jump('add', 1, 3, line10), jump('add', 1, 4, line10), jump('add', 1, 4, line10, 'abstract'), jump('add', 1, 4, line10, 'abstract')] },
+    // 2. Vooruit en terug tot 10
+    { reward: '🐟', specs: [jump('subtract', 1, 2, line10), jump('add', 1, 3, line10), jump('subtract', 1, 3, line10), jump('add', 1, 4, line10, 'abstract'), jump('subtract', 1, 4, line10, 'abstract'), jump('subtract', 1, 4, line10, 'abstract')] },
+    // 3. Tot 20, zonder over het tiental
+    { reward: '🦆', specs: [jump('add', 2, 3, line20), jump('subtract', 2, 3, line20), jump('add', 2, 5, line20), jump('subtract', 2, 5, line20), jump('add', 2, 5, line20, 'abstract'), jump('subtract', 2, 5, line20, 'abstract')] },
+  ],
 };
 
 export const getallenbos: Area = {

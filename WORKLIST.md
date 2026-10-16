@@ -10,10 +10,7 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 
 ## Volgende
 
-- [ ] Fase 2: slepen (Pointer Events) als derde bedieningsvorm
-- [ ] Fase 2: missie met aftrekken (keuzeknoppen/slepen)
 - [ ] Fase 2: `e2e/nonreading.cjs` in CI draaien (Playwright als devDependency)
-- [ ] ESLint toevoegen (er is nog geen lint-commando)
 - [ ] Fase 3: canvas-wereldkaart, ontgrendelen, audio
 - [ ] Fase 4: ouder-menu, `navigator.storage.persist()`, voortgang wissen
 
@@ -26,6 +23,8 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 - Getal zoeken is nu 'hetzelfde getal vinden'; hoor-naar-symbool alleen met spraak. Voldoende?
 
 ## Klaar
+
+- [x] Fase 2: rekenengine (10 vaardigheden, niveaus, afleiders), rondes, ESLint (2026-10-16)
 
 - [x] GitHub Pages actief: deploy-job van run #2 geslaagd (2026-10-16)
 

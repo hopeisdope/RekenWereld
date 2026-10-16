@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { seededRng } from '../src/math/generate';
+import { buildRoundTasks } from '../src/missions/build';
 import { missions } from '../src/missions/getallenbos';
 import { currentTask, reduce, startSession, starsFor, type SessionState } from '../src/state/session';
 
 function freshSession(): SessionState {
-  return startSession('appelmand', missions.appelmand.buildTasks(seededRng(1)));
+  return startSession('appelmand', buildRoundTasks(missions.appelmand, 0, seededRng(1)));
 }
 const answerOf = (s: SessionState) => currentTask(s).exercise.answer;
 const wrongOf = (s: SessionState) => currentTask(s).choices!.find((c) => c !== answerOf(s))!;
@@ -73,5 +74,53 @@ describe('sterren', () => {
     expect(starsFor({ tasks, firstTry: 3 })).toBe(2);
     expect(starsFor({ tasks, firstTry: 5 })).toBe(3);
     expect(starsFor({ tasks, firstTry: 6 })).toBe(3);
+  });
+});
+
+describe('meerstaps-opdrachten (ordenen)', () => {
+  const orderSession = () => startSession('voetstappen', buildRoundTasks(missions.voetstappen, 2, seededRng(3)).filter((t) => t.prompt === 'order'));
+
+  it('elke goede stap schuift door; pas na de laatste stap is de opdracht goed', () => {
+    let s = orderSession();
+    const steps = currentTask(s).exercise.steps!;
+    for (let i = 0; i < steps.length - 1; i++) {
+      s = answer(s, steps[i]);
+      expect(s.phase).toBe('asking');
+      expect(s.step).toBe(i + 1);
+      expect(s.feedback).toBe('step');
+    }
+    s = answer(s, steps[steps.length - 1]);
+    expect(s.phase).toBe('correct');
+    expect(s.firstTry).toBe(1);
+  });
+
+  it('fout in een tussenstap telt als fout, maar de opdracht gaat door', () => {
+    let s = orderSession();
+    const steps = currentTask(s).exercise.steps!;
+    s = answer(s, steps[1]);
+    expect(s.feedback).toBe('tryAgain');
+    expect(s.step).toBe(0);
+    s = answer(s, steps[0]);
+    expect(s.wrong).toEqual([]); // vorige foute keuze is weer beschikbaar
+    for (const v of steps.slice(1)) s = answer(s, v);
+    expect(s.phase).toBe('correct');
+    expect(s.firstTry).toBe(0);
+  });
+
+  it('dubbel tikken op een al geplaatst getal doet niets', () => {
+    let s = orderSession();
+    const steps = currentTask(s).exercise.steps!;
+    s = answer(s, steps[0]);
+    const again = answer(s, steps[0]);
+    expect(again.step).toBe(1);
+    expect(again.feedback).toBe('tryAgain'); // al geplaatst = niet het volgende getal
+  });
+
+  it('hervatten: sessie starten bij een opgeslagen opdracht', () => {
+    const tasks = buildRoundTasks(missions.appelmand, 0, seededRng(8));
+    const s = startSession('appelmand', tasks, 3, 2);
+    expect(s.index).toBe(3);
+    expect(s.firstTry).toBe(2);
+    expect(startSession('appelmand', tasks, 99).index).toBe(tasks.length - 1);
   });
 });

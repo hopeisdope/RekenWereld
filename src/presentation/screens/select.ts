@@ -56,7 +56,7 @@ export function selectScreen(progress: Progress, onPick: (missionId: string) => 
     const tile = bigButton(
       [
         SCENES[id](),
-        starRow(p?.bestStars ?? 0),
+        starRow(p?.roundsDone ?? 0, m.rounds.length),
         el('span', { class: 'tile-title' }, m.title),
         id === suggested ? el('span', { class: 'point-down', 'aria-hidden': 'true' }, '👇') : null,
       ],

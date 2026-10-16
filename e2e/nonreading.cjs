@@ -7,24 +7,48 @@
 const path = require('node:path');
 const fs = require('node:fs');
 const { chromium } = require(process.env.PW || 'playwright');
-const URL = process.env.BASE_URL || 'http://localhost:4173/RekenWereld/';
+const APP_URL = process.env.BASE_URL || 'http://localhost:4173/RekenWereld/';
 const SP = process.env.SP || path.join(__dirname, 'output');
 fs.mkdirSync(SP, { recursive: true });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const log = [];
 const step = (n, msg, ok = true) => { log.push(`${ok ? '✅' : '❌'} ${n}. ${msg}`); if (!ok) process.exitCode = 1; };
 
-/** Leid het antwoord af uit de beelden, niet uit tekst. */
+/**
+ * Leid het antwoord af uit de beelden en getallen, nooit uit tekst (.caption).
+ * Geeft een lijst terug: de waarden om achter elkaar aan te tikken.
+ */
 async function visualAnswer(page) {
   return page.evaluate(() => {
     const v = document.querySelector('.visual');
-    if (v.querySelector('.count-scene')) return v.querySelectorAll('.count-scene .item').length;
-    if (v.querySelector('.sign')) return Number(v.querySelector('.sign').textContent);
-    if (v.querySelector('.basket')) return v.querySelectorAll('.basket .item').length;
+    const num = (el) => Number(el.textContent.trim());
+    const eq = v.querySelector('.equation')?.textContent.replace(/\s/g, '');
+    if (v.querySelector('.count-scene')) return [v.querySelectorAll('.count-scene .item').length];
+    if (v.querySelector('.sign')) return [num(v.querySelector('.sign'))];
+    if (v.querySelector('.number-path')) {
+      const tiles = [...v.querySelectorAll('.path-tile')];
+      const gap = tiles.findIndex((t) => t.classList.contains('gap'));
+      return [gap > 0 ? num(tiles[gap - 1].querySelector('.tile-number')) + 1 : num(tiles[1].querySelector('.tile-number')) - 1];
+    }
+    if (v.querySelector('.split-house')) return [num(v.querySelector('.roof')) - num(v.querySelector('.room .room-number'))];
+    if (document.querySelector('.choices.groups')) {
+      // Vergelijken: tel de voorwerpen in elke knop (of lees het getal als er geen voorwerpen zijn).
+      const sizes = [...document.querySelectorAll('.choices.groups .choice')].map((b) => b.querySelectorAll('.item').length || num(b));
+      return [Math.max(...sizes)];
+    }
+    if (document.querySelector('.sequence')) {
+      return [...document.querySelectorAll('.sequence .tile:not(.used)')].map(num).sort((a, b) => a - b);
+    }
     if (v.querySelector('.jump-card')) {
       const start = Number(document.querySelector('.stone.start').dataset.value);
-      const hops = v.querySelectorAll('.hop-arc').length;
-      return v.querySelector('.jump-card.back') ? start - hops : start + hops;
+      const hops = num(v.querySelector('.jump-count'));
+      return [v.querySelector('.jump-card.back') ? start - hops : start + hops];
+    }
+    if (eq) {
+      let m = eq.match(/^(\d+)\+\?=(\d+)$/);
+      if (m) return [Number(m[2]) - Number(m[1])];
+      m = eq.match(/^(\d+)([+−])(\d+)=\?$/);
+      if (m) return [m[2] === '+' ? Number(m[1]) + Number(m[3]) : Number(m[1]) - Number(m[3])];
     }
     return null;
   });
@@ -39,12 +63,16 @@ async function doDemo(page, tag) {
   const p = await pointed(page);
   const watchOk = (await mode(page)) === 'demo-watch' && p !== null;
   await page.screenshot({ path: `${SP}/nr-${tag}-demo-watch.png` });
-  await page.waitForFunction(() => document.querySelector('.mode-demo-try'), null, { timeout: 6000 });
+  await page.waitForFunction(() => document.querySelector('.mode-demo-try'), null, { timeout: 15000 });
   const noHandYet = (await pointed(page)) === null;
   await sleep(5300); // kind doet niets → hand verschijnt
   const idleHand = await pointed(page);
   await page.screenshot({ path: `${SP}/nr-${tag}-demo-try.png` });
   await tapValue(page, idleHand);
+  await sleep(150);
+  if ((await mode(page)) === 'demo-try' && !(await page.locator('.feedback.good').count())) {
+    for (const v of (await visualAnswer(page)) ?? []) { await tapValue(page, v); await sleep(120); }
+  }
   await page.waitForFunction(() => document.querySelector('.mode-task'), null, { timeout: 4000 });
   return watchOk && noHandYet && idleHand !== null;
 }
@@ -53,6 +81,7 @@ async function doDemo(page, tag) {
 async function playMission(page, tag, { makeMistakes = false, mistakesOnJump = false } = {}) {
   const demos = [];
   let mistakeChecked = null, jumpPointerChecked = null;
+  const kinds = new Set();
   for (;;) {
     await sleep(150);
     if (await page.locator('.result').count()) break;
@@ -62,9 +91,11 @@ async function playMission(page, tag, { makeMistakes = false, mistakesOnJump = f
     if (await page.locator('.feedback.good').count()) continue; // aan het vieren
     await sleep(420); // invoerbeveiliging
     const idx = await nowIndex(page);
-    const ans = await visualAnswer(page);
+    const answersSeq = await visualAnswer(page);
+    if (!answersSeq) throw new Error(`geen beeld-antwoord in ${tag} opdracht ${idx}`);
+    const ans = answersSeq[0];
     if (makeMistakes && mistakeChecked === null) {
-      const wrong = await page.evaluate((a) => [...document.querySelectorAll('.answers button:not([disabled])')].map((b) => Number(b.dataset.value)).find((v) => v !== a), ans);
+      const wrong = await page.evaluate((a) => [...document.querySelectorAll('.answers .choice:not([disabled])')].map((b) => Number(b.dataset.value)).find((v) => v !== a), ans);
       await tapValue(page, wrong);
       await sleep(150);
       const st = await page.evaluate((w) => ({
@@ -82,11 +113,11 @@ async function playMission(page, tag, { makeMistakes = false, mistakesOnJump = f
       jumpPointerChecked = Number(await pointed(page)) === ans;
       await page.screenshot({ path: `${SP}/nr-${tag}-jump-pointer.png` });
     }
-    await tapValue(page, ans);
-    await sleep(100);
-    if (!(await page.locator('.feedback.good').count())) throw new Error(`antwoord ${ans} niet goed in ${tag} opdracht ${idx}`);
+    for (const v of answersSeq) { await tapValue(page, v); await sleep(120); }
+    if (!(await page.locator('.feedback.good').count())) throw new Error(`antwoord ${answersSeq} niet goed in ${tag} opdracht ${idx}`);
+    kinds.add(await page.evaluate(() => document.querySelector('.mission-card-body').className.match(/prompt-(\S+)/)[1]));
   }
-  return { demos, mistakeChecked, jumpPointerChecked };
+  return { demos, mistakeChecked, jumpPointerChecked, kinds: [...kinds] };
 }
 
 (async () => {
@@ -95,10 +126,10 @@ async function playMission(page, tag, { makeMistakes = false, mistakesOnJump = f
   const page = await ctx.newPage();
   const errors = [], foreign = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  page.on('request', (r) => { if (!r.url().startsWith(new globalThis.URL(URL).origin)) foreign.push(r.url()); });
+  page.on('request', (r) => { if (!r.url().startsWith(new URL(APP_URL).origin)) foreign.push(r.url()); });
 
   // 1. App openen
-  await page.goto(URL);
+  await page.goto(APP_URL);
   await page.screenshot({ path: `${SP}/nr-1-start.png` });
   const startOk = await page.evaluate(() => {
     const play = document.querySelector('.play-button');
@@ -149,8 +180,24 @@ async function playMission(page, tag, { makeMistakes = false, mistakesOnJump = f
   const r3 = await playMission(page, 'rivier', { mistakesOnJump: true });
   step('9c', 'Rivier: voorbeeld springen; na 2 fouten wijst de hand de goede steen aan', r3.demos.length === 1 && r3.demos[0] && r3.jumpPointerChecked === true);
 
-  // Herhaling: geen uitleg meer, maar hulpknop werkt
+  // Fase 2: alle overige rondes (2 en 3) van elke missie, alle opdrachtsoorten
+  const allKinds = new Set([...r1.kinds, ...r2.kinds, ...r3.kinds]);
+  for (const id of ['voetstappen', 'appelmand', 'rivier']) {
+    for (let round = 2; round <= 3; round++) {
+      await page.locator('.result .play-button.next').tap({ force: true }).catch(() => {});
+      await page.waitForSelector('.mission-grid');
+      await page.locator(`.mission-tile[data-mission="${id}"]`).tap({ force: true });
+      const r = await playMission(page, `${id}-r${round}`);
+      r.kinds.forEach((k) => allKinds.add(k));
+    }
+  }
+  step('2a', `Alle 9 rondes uitgespeeld; opdrachtsoorten: ${[...allKinds].sort().join(', ')}`, ['add', 'compare', 'count', 'jump', 'makeTen', 'missing', 'order', 'recognize', 'split', 'subtract'].every((k) => allKinds.has(k)));
   await page.locator('.result .play-button.next').tap({ force: true });
+  await page.waitForSelector('.mission-grid');
+  const allStars = await page.evaluate(() => document.querySelectorAll('.mission-tile .star.on').length);
+  step('2b', `Missiekaart toont alle rondes als gouden sterren (${allStars}/9)`, allStars === 9);
+
+  // Herhaling: geen uitleg meer, maar hulpknop werkt
   await page.locator('.mission-tile[data-mission="appelmand"]').tap({ force: true });
   await sleep(300);
   const noDemo = (await mode(page)) === 'task';

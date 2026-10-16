@@ -1,15 +1,16 @@
-import { isCorrect } from '../math/check';
+import { isCorrect, stepCount } from '../math/check';
 import type { Task } from '../missions/types';
 
 /**
- * Verloop van één missie als pure toestandsmachine:
+ * Verloop van één missieronde als pure toestandsmachine:
  *
- *   asking --goed--> correct --next--> asking (volgende opdracht) | finished
- *   asking --fout--> asking (met hint; missie gaat gewoon door)
+ *   asking --goed (laatste stap)--> correct --next--> asking (volgende) | finished
+ *   asking --goed (tussenstap)----> asking (step + 1)     [ordenen]
+ *   asking --fout-----------------> asking (met hint; missie gaat gewoon door)
  *
- * Antwoorden worden genegeerd als ze niet bij de huidige opdracht horen of als
- * de opdracht al goed is beantwoord. Zo kan dubbel tikken nooit een opdracht
- * overslaan.
+ * Antwoorden worden genegeerd als ze niet bij de huidige opdracht horen, als
+ * de opdracht al goed is, of als hetzelfde foute antwoord nog eens komt. Zo
+ * kan dubbel tikken nooit een opdracht overslaan of dubbel tellen.
  */
 export type Phase = 'asking' | 'correct' | 'finished';
 
@@ -17,14 +18,18 @@ export interface SessionState {
   missionId: string;
   tasks: readonly Task[];
   index: number;
+  /** Tussenstap binnen de opdracht (ordenen); anders 0. */
+  step: number;
   phase: Phase;
-  /** Foute antwoorden op de huidige opdracht (worden uitgeschakeld in de UI). */
+  /** Foute antwoorden op de huidige (tussen)stap. */
   wrong: readonly number[];
+  /** Aantal fouten bij de huidige opdracht (alle stappen samen). */
+  mistakes: number;
   /** Toon een hint bij de huidige opdracht (na een fout antwoord). */
   showHint: boolean;
-  /** Laatste reactie, voor de feedbacktekst. */
-  feedback: 'correct' | 'tryAgain' | null;
-  /** Aantal opdrachten dat in één keer goed was. */
+  /** Laatste reactie, voor de feedback. */
+  feedback: 'correct' | 'step' | 'tryAgain' | null;
+  /** Aantal opdrachten dat zonder fout goed was. */
   firstTry: number;
 }
 
@@ -32,9 +37,10 @@ export type SessionEvent =
   | { type: 'answer'; taskId: string; value: number }
   | { type: 'next' };
 
-export function startSession(missionId: string, tasks: readonly Task[]): SessionState {
+export function startSession(missionId: string, tasks: readonly Task[], index = 0, firstTry = 0): SessionState {
   if (tasks.length === 0) throw new Error('missie zonder opdrachten');
-  return { missionId, tasks, index: 0, phase: 'asking', wrong: [], showHint: false, feedback: null, firstTry: 0 };
+  const i = Math.max(0, Math.min(index, tasks.length - 1));
+  return { missionId, tasks, index: i, step: 0, phase: 'asking', wrong: [], mistakes: 0, showHint: false, feedback: null, firstTry };
 }
 
 export function currentTask(s: SessionState): Task {
@@ -45,15 +51,19 @@ export function reduce(s: SessionState, e: SessionEvent): SessionState {
   switch (e.type) {
     case 'answer': {
       if (s.phase !== 'asking' || e.taskId !== currentTask(s).id || s.wrong.includes(e.value)) return s;
-      if (isCorrect(currentTask(s).exercise, e.value)) {
-        return { ...s, phase: 'correct', feedback: 'correct', firstTry: s.firstTry + (s.wrong.length === 0 ? 1 : 0) };
+      const ex = currentTask(s).exercise;
+      if (!isCorrect(ex, e.value, s.step)) {
+        return { ...s, wrong: [...s.wrong, e.value], mistakes: s.mistakes + 1, showHint: true, feedback: 'tryAgain' };
       }
-      return { ...s, wrong: [...s.wrong, e.value], showHint: true, feedback: 'tryAgain' };
+      if (s.step + 1 < stepCount(ex)) {
+        return { ...s, step: s.step + 1, wrong: [], feedback: 'step' };
+      }
+      return { ...s, phase: 'correct', feedback: 'correct', firstTry: s.firstTry + (s.mistakes === 0 ? 1 : 0) };
     }
     case 'next': {
       if (s.phase !== 'correct') return s;
       if (s.index + 1 >= s.tasks.length) return { ...s, phase: 'finished', feedback: null };
-      return { ...s, index: s.index + 1, phase: 'asking', wrong: [], showHint: false, feedback: null };
+      return { ...s, index: s.index + 1, step: 0, phase: 'asking', wrong: [], mistakes: 0, showHint: false, feedback: null };
     }
   }
 }

@@ -1,4 +1,3 @@
-import type { Mission } from '../../missions/types';
 import { bigButton, el } from '../dom';
 import { speak } from '../speech';
 import { starRow } from './select';
@@ -14,7 +13,7 @@ const CHEERS: Record<1 | 2 | 3, string> = {
  * Beloning: sterren en een nieuw dier. Eén grote knop om verder te gaan
  * (terug naar de missies), een klein knopje om opnieuw te spelen.
  */
-export function resultScreen(mission: Mission, stars: 1 | 2 | 3, onAgain: () => void, onNext: () => void): Screen {
+export function resultScreen(reward: string, stars: 1 | 2 | 3, onAgain: () => void, onNext: () => void): Screen {
   speak(`Missie gelukt! ${CHEERS[stars]}`);
 
   const next = bigButton(el('span', { class: 'play-triangle', 'aria-hidden': 'true' }), onNext, 'play-button next');
@@ -33,7 +32,7 @@ export function resultScreen(mission: Mission, stars: 1 | 2 | 3, onAgain: () => 
         'div',
         { class: 'card' },
         confetti,
-        el('div', { class: 'reward-row' }, el('span', { class: 'mascot happy', 'aria-hidden': 'true' }, '🦉'), el('div', { class: 'reward', role: 'img', 'aria-label': 'Beloning' }, mission.reward)),
+        el('div', { class: 'reward-row' }, el('span', { class: 'mascot happy', 'aria-hidden': 'true' }, '🦉'), el('div', { class: 'reward', role: 'img', 'aria-label': 'Beloning' }, reward)),
         starRow(stars),
         el('div', { class: 'result-actions' }, again, next),
       ),

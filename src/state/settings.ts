@@ -9,7 +9,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = { sound: true, seenDemos: [] };
 
-const KINDS: readonly PromptKind[] = ['count', 'recognize', 'add', 'jump'];
+const KINDS: readonly PromptKind[] = ['count', 'recognize', 'build', 'compare', 'order', 'missing', 'add', 'subtract', 'split', 'makeTen', 'jump'];
 
 export function parseSettings(raw: unknown): Settings {
   if (!raw || typeof raw !== 'object') return DEFAULT_SETTINGS;

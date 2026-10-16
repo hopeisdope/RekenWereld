@@ -1,33 +1,66 @@
-import type { Exercise, Rng } from '../math/types';
+import type { SkillId, SkillLevel } from '../math/skills';
+import type { Exercise } from '../math/types';
 
 /** Hoe het kind antwoordt. */
-export type InteractionKind = 'choice' | 'numberline';
+export type InteractionKind = 'choice' | 'numberline' | 'sequence' | 'drag';
 
-/** Wat er getoond wordt bij de opgave; de presentatielaag kiest de weergave. */
-export type PromptKind = 'count' | 'recognize' | 'add' | 'jump';
+/**
+ * Soort opdracht zoals het kind hem ziet; bepaalt de weergave en welk
+ * voorbeeld wordt voorgedaan. Meestal gelijk aan de vaardigheid; 'jump' is
+ * optellen/aftrekken op de getallenlijn.
+ */
+export type PromptKind = SkillId | 'jump';
+
+/**
+ * Ondersteuning: 'concrete' toont voorwerpen bij de getallen; 'abstract'
+ * alleen getallen. Bij een fout komen de voorwerpen altijd terug als hint.
+ */
+export type Support = 'concrete' | 'abstract';
+
+/** Thema van de missie: welke voorwerpen er geteld/getoond worden. */
+export type Theme = 'paws' | 'apples' | 'frog';
 
 export interface Task {
   id: string;
   prompt: PromptKind;
   interaction: InteractionKind;
   exercise: Exercise;
-  /** Antwoordknoppen (alleen bij 'choice'), in willekeurige volgorde. */
+  support: Support;
+  theme: Theme;
+  /** Antwoordknoppen (bij 'choice'), in willekeurige volgorde. */
   choices?: readonly number[];
-  /** Bereik van de getallenlijn (alleen bij 'numberline'). */
+  /** Bereik van de getallenlijn (bij 'numberline'). */
   line?: { min: number; max: number };
+}
+
+/** Eén geplande opdracht in een ronde. */
+export interface TaskSpec {
+  skill: SkillId;
+  /** Index in SKILLS[skill].levels. */
+  level: number;
+  /** Kleine aanpassing op het niveau (bv. kleinere sprongen). */
+  tweak?: Partial<SkillLevel>;
+  prompt?: PromptKind;
+  interaction?: InteractionKind;
+  support?: Support;
+  line?: { min: number; max: number };
+}
+
+export interface Round {
+  /** Verzamelobject (dier) dat het kind vindt na deze ronde. */
+  reward: string;
+  specs: readonly TaskSpec[];
 }
 
 export interface Mission {
   id: string;
   areaId: string;
   title: string;
-  /** Korte uitleg voor op de missiekaart. */
+  /** Korte uitleg voor ouders; niet nodig voor het kind. */
   goal: string;
   emoji: string;
-  /** Beloningssticker na afloop. */
-  reward: string;
-  /** Maakt een nieuwe set van 5–8 opdrachten. */
-  buildTasks(rng: Rng): Task[];
+  theme: Theme;
+  rounds: readonly Round[];
 }
 
 export interface Area {

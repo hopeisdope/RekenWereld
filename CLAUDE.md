@@ -24,7 +24,8 @@ Architectuur, MVP en risico's: `IMPLEMENTATION_PLAN.md`.
 npm ci && npm run dev        # http://localhost:5173/
 npm run preview:pages        # productiebuild op http://localhost:4173/RekenWereld/
 npm test                     # unit-tests
-npm run check                # typecheck + tests + build, zoals CI
+npm run lint                 # ESLint
+npm run check                # lint + typecheck + tests + build, zoals CI
 ```
 
 ## Git
@@ -40,6 +41,8 @@ npm run check                # typecheck + tests + build, zoals CI
 - Knoppen en sleepdoelen minimaal 88×88 CSS-px; niets mag alleen via tekst te begrijpen zijn.
   Uitzondering: stenen op de getallenlijn 0–10 (≥ 56 px breed, 112 px hoog, aansluitend).
 - Lagen: `math` → `missions` → `state` (pure reducers) → `presentation` (DOM/canvas).
+  Niveaus/grenzen per vaardigheid staan alleen in `src/math/skills.ts`; leerlijnen (rondes) in
+  `src/missions/getallenbos.ts`.
   Presentatie bevat geen rekenlogica; teksten voor het kind staan in `presentation/texts.ts`.
 - Geen tijdsdruk, geen strafpunten; altijd minstens één ster.
 - **Spelen zonder lezen** (fase 1.5): elke stap moet te begrijpen zijn via beeld, getallen,

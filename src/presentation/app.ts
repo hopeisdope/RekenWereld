@@ -1,6 +1,6 @@
 import { missions } from '../missions/getallenbos';
 import type { PromptKind } from '../missions/types';
-import { parseProgress, recordResult, type Progress } from '../state/progress';
+import { nextRound, parseProgress, recordResult, type Progress } from '../state/progress';
 import { markDemoSeen, parseSettings, type Settings } from '../state/settings';
 import { SCHEMA_VERSION, type Storage } from '../storage/storage';
 import { missionScreen } from './screens/mission';
@@ -43,19 +43,19 @@ export function startApp(ui: HTMLElement, storage: Storage, rng: () => number = 
 
   const goStart = () => show(startScreen(settings.sound, goSelect, toggleSound));
   const goSelect = () => show(selectScreen(progress, goMission, goStart));
-  const goMission = (id: string) => {
+  const goMission = (id: string, round = nextRound(progress, id, missions[id].rounds.length)) => {
     const mission = missions[id];
     show(
-      missionScreen(mission, rng, {
+      missionScreen(mission, round, rng, {
         seenDemos: () => settings.seenDemos,
         onDemoSeen: (kind: PromptKind) => {
           settings = markDemoSeen(settings, kind);
           save();
         },
         onFinish: (stars) => {
-          progress = recordResult(progress, id, stars);
+          progress = recordResult(progress, id, stars, round, mission.rounds.length);
           save();
-          show(resultScreen(mission, stars, () => goMission(id), goSelect));
+          show(resultScreen(mission.rounds[round].reward, stars, () => goMission(id, round), goSelect));
         },
         onQuit: goSelect,
       }),
