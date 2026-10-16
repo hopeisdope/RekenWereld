@@ -10,6 +10,9 @@ Beknopte stand voor een nieuwe sessie. Details staan in `WORKLIST.md`.
 - `npm run check` groen (34 unit-tests). `e2e/nonreading.cjs`: 14/14 stappen groen op
   iPad mini staand; liggend iPad visueel gecontroleerd; offline herladen werkt.
 
+- GitHub Pages staat aan: deploy-job slaagt sinds run #2. De URL is vanuit de cloudcontainer niet
+  bereikbaar (proxy), dus nog niet zelf in een browser bekeken.
+
 ## Nog te observeren met het kind
 - Begrijpt het de ▶-knop en de wijzende uil zonder uitleg van een volwassene?
 - Herkent het de drie missieplaatjes en begrijpt het grijze vs. gouden sterren?
