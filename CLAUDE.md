@@ -38,6 +38,10 @@ npm run check                # typecheck + tests + build, zoals CI
 - Nooit hardgecodeerde paden naar `/RekenWereld/`: gebruik `import.meta.env.BASE_URL`,
   absolute `/…`-paden in `index.html` (Vite zet de base ervoor) of relatieve paden.
 - Knoppen en sleepdoelen minimaal 88×88 CSS-px; niets mag alleen via tekst te begrijpen zijn.
+  Uitzondering: stenen op de getallenlijn 0–10 (≥ 56 px breed, 112 px hoog, aansluitend).
+- Lagen: `math` → `missions` → `state` (pure reducers) → `presentation` (DOM/canvas).
+  Presentatie bevat geen rekenlogica; teksten voor het kind staan in `presentation/texts.ts`.
+- Geen tijdsdruk, geen strafpunten; altijd minstens één ster.
 - Geen externe netwerkverzoeken (geen CDN, fonts, analytics).
 - Publieke repo: geen persoonsgegevens van het kind in code, commits of issues.
 - Opslagschema wijzigen = `SCHEMA_VERSION` ophogen en migratie toevoegen in `src/storage/`.

@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN — RekenWereld
 
-Status: **Fase 0 afgerond** (inventarisatie, architectuur, buildketen). Laatst bijgewerkt: 2026-10-16.
+Status: **Fase 1 afgerond** (Getallenbos met drie speelbare missies). Laatst bijgewerkt: 2026-10-16.
 
 ## 1. Uitgangssituatie (fase 0-inventarisatie)
 
@@ -183,11 +183,18 @@ Nog niet geverifieerd: echte deploy op Pages, gedrag op een fysieke iPad.
 
 1. **Fase 0** ✅ skelet, buildketen, workflow, README, dit plan.
 2. **Eenmalig GitHub**: Pages-bron op *GitHub Actions* zetten; eerste deploy verifiëren op iPad.
-3. **Fase 1 – kern zonder UI**: `math` (tellen, +/− tot 10 en 20, antwoordcontrole, afleiders voor
-   keuzeknoppen), `missions` (datamodel + content voor 2 gebieden), `state` (pure reducer),
-   opslag koppelen. Volledig met unit-tests.
-4. **Fase 2 – bediening**: `interactions/` buttons → getallenlijn → slepen (Pointer Events),
-   missiescherm, feedback en beloning. Playwright-rooktest (iPad-viewport, touch) in CI.
+3. **Fase 1** ✅ (bijgesteld: kernlogica én eerste speelbare UI)
+   - Startscherm met Uil Ollie en één gebied: *Het Getallenbos* (canvas-achtergrond).
+   - Missieselectie met drie missies van 6 opdrachten: *De verdwenen voetstappen* (tellen en
+     getallen herkennen tot 20, keuzeknoppen), *De appelmand* (optellen tot 10, keuzeknoppen),
+     *De rivier oversteken* (vooruit/terug springen op getallenlijn 0–10).
+   - Missieflow als pure reducer (`src/state/session.ts`): één opdracht tegelijk, vriendelijke
+     feedback, hint na fout, fout antwoord wordt uitgeschakeld, automatisch door na goed,
+     resultaat met sterren (altijd ≥ 1) en beloningsdier. Dubbeltik-beveiliging in reducer
+     (antwoord moet bij huidige opdracht horen) én in UI (400 ms na nieuwe opdracht).
+   - Voortgang (beste sterren per missie) in localStorage; voorlezen via Web Speech API (optioneel).
+4. **Fase 2 – bediening uitbreiden**: slepen (Pointer Events), aftrekken in eigen missie,
+   Playwright-rooktest (iPad-viewport, touch) in CI.
 5. **Fase 3 – wereld**: canvas-wereldkaart met gebieden, ontgrendelen, animaties, audio.
 6. **Fase 4 – afronding MVP**: ouder-menu, persist-verzoek, testen op iPad en iPad mini, offline-test.
 7. **Later**: splitsen, patronen, vormen, meten, dagelijks leven; export/import van voortgang.
