@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN — RekenWereld
 
-Status: **Fase 1 afgerond** (Getallenbos met drie speelbare missies). Laatst bijgewerkt: 2026-10-16.
+Status: **Fase 1.5 afgerond** (spelen zonder leesvaardigheid). Laatst bijgewerkt: 2026-10-16.
 
 ## 1. Uitgangssituatie (fase 0-inventarisatie)
 
@@ -193,11 +193,27 @@ Nog niet geverifieerd: echte deploy op Pages, gedrag op een fysieke iPad.
      resultaat met sterren (altijd ≥ 1) en beloningsdier. Dubbeltik-beveiliging in reducer
      (antwoord moet bij huidige opdracht horen) én in UI (400 ms na nieuwe opdracht).
    - Voortgang (beste sterren per missie) in localStorage; voorlezen via Web Speech API (optioneel).
-4. **Fase 2 – bediening uitbreiden**: slepen (Pointer Events), aftrekken in eigen missie,
+4. **Fase 1.5** ✅ spelen zonder lezen (na eerste test met het kind)
+   - Gevonden leesobstakels: tekstknop als hoofdactie op start; missies vooral te onderscheiden
+     via titel/uitleg; opdracht alleen in tekstballon ("Tik op het getal zestien" onoplosbaar
+     zonder lezen/spraak; vooruit/terug en aantal sprongen alleen in tekst); geen voorbeeld bij
+     nieuwe interactie; feedback/hint als tekst; resultaat met twee gelijkwaardige tekstknoppen.
+   - Start: grote ronde ▶-knop, uil wijst ernaar (👉); geluid-aan/uit klein in de hoek.
+   - Missiekeuze: drie grote plaatjes (pootjesspoor, appelmand, rivier met kikker); grijze vs.
+     gouden sterren; 👇 + gloed op de eerstvolgende missie; één tik start direct.
+   - Opdrachten: tellen met ❓-bol; getal zoeken = hetzelfde getal als op het bordje;
+     springen met pijlkaart (➡️/⬅️ + bogen + getal); tekst klein en optioneel.
+   - Voorbeeld per nieuwe soort opdracht: uil doet voor (👀, hand tikt), kind probeert zelf (🙋,
+     hand verschijnt na 5 s niets doen); daarna niet meer, behalve via ❓-hulpknop.
+   - Feedback: groen vinkje + sterrenregen + uil springt; fout = knop grijs, uil kantelt,
+     visuele hint; na 2 fouten bij ≥ 4 keuzes wijst de hand het antwoord aan.
+   - Resultaat: dier + sterren + confetti, grote ▶ (verder), klein 🔁 (opnieuw).
+   - Spraak alleen met lokale stemmen; zonder stem blijft de app volledig bruikbaar.
+5. **Fase 2 – bediening uitbreiden**: slepen (Pointer Events), aftrekken in eigen missie,
    Playwright-rooktest (iPad-viewport, touch) in CI.
-5. **Fase 3 – wereld**: canvas-wereldkaart met gebieden, ontgrendelen, animaties, audio.
-6. **Fase 4 – afronding MVP**: ouder-menu, persist-verzoek, testen op iPad en iPad mini, offline-test.
-7. **Later**: splitsen, patronen, vormen, meten, dagelijks leven; export/import van voortgang.
+6. **Fase 3 – wereld**: canvas-wereldkaart met gebieden, ontgrendelen, animaties, audio.
+7. **Fase 4 – afronding MVP**: ouder-menu, persist-verzoek, testen op iPad en iPad mini, offline-test.
+8. **Later**: splitsen, patronen, vormen, meten, dagelijks leven; export/import van voortgang.
 
 ## 8. Werkwijze
 

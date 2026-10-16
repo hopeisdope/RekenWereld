@@ -1,14 +1,17 @@
 /**
- * Voorlezen met de ingebouwde spraak van het apparaat (Web Speech API, geen
- * netwerk). Werkt alleen als er een Nederlandse stem is; anders stil.
- * Op iOS mag spraak pas na een eerste tik van de gebruiker.
+ * Voorlezen met de ingebouwde spraak van het apparaat (Web Speech API).
+ * Alleen stemmen die lokaal op het apparaat draaien (`localService`) worden
+ * gebruikt, zodat er nooit tekst naar een server gaat en het offline werkt.
+ * Zonder lokale Nederlandse stem blijft de app stil; alles is ook zonder
+ * geluid te begrijpen. Op iOS mag spraak pas na een eerste tik.
  */
-let voice: SpeechSynthesisVoice | null | undefined;
+let voice: SpeechSynthesisVoice | null = null;
+let enabled = true;
 
-function dutchVoice(): SpeechSynthesisVoice | null {
-  if (voice !== undefined && voice !== null) return voice;
-  const voices = speechSynthesis.getVoices();
-  voice = voices.find((v) => v.lang === 'nl-NL') ?? voices.find((v) => v.lang.startsWith('nl')) ?? null;
+function dutchLocalVoice(): SpeechSynthesisVoice | null {
+  if (voice) return voice;
+  const local = speechSynthesis.getVoices().filter((v) => v.localService);
+  voice = local.find((v) => v.lang.replace('_', '-') === 'nl-NL') ?? local.find((v) => v.lang.startsWith('nl')) ?? null;
   return voice;
 }
 
@@ -16,15 +19,21 @@ export function canSpeak(): boolean {
   return typeof window !== 'undefined' && 'speechSynthesis' in window;
 }
 
+export function setSpeechEnabled(on: boolean): void {
+  enabled = on;
+  if (!on) stopSpeaking();
+}
+
 export function speak(text: string): void {
-  if (!canSpeak()) return;
+  if (!enabled || !canSpeak()) return;
   try {
+    const v = dutchLocalVoice();
+    if (!v) return;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'nl-NL';
+    u.voice = v;
+    u.lang = v.lang;
     u.rate = 0.9;
-    const v = dutchVoice();
-    if (v) u.voice = v;
     speechSynthesis.speak(u);
   } catch {
     /* spraak is optioneel */

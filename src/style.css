@@ -35,6 +35,7 @@ html, body {
   position: absolute;
   inset: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding:
     max(16px, env(safe-area-inset-top))
@@ -55,6 +56,7 @@ button:focus-visible { outline: 4px solid #1565c0; outline-offset: 3px; }
 /* ---------- Schermen ---------- */
 
 .screen {
+  position: relative;
   min-height: 100%;
   display: flex;
   flex-direction: column;
@@ -66,6 +68,7 @@ button:focus-visible { outline: 4px solid #1565c0; outline-offset: 3px; }
 }
 
 .card {
+  position: relative;
   width: 100%;
   background: var(--card);
   border-radius: calc(var(--radius) * 1.25);
@@ -80,7 +83,7 @@ button:focus-visible { outline: 4px solid #1565c0; outline-offset: 3px; }
 h1 { margin: 0; font-size: clamp(28px, 4.5vmin, 44px); text-align: center; }
 
 .title {
-  font-size: clamp(48px, 9vmin, 88px);
+  font-size: clamp(44px, 8vmin, 80px);
   color: #fff;
   text-shadow: 0 4px 0 var(--bg), 0 6px 12px rgba(0, 0, 0, 0.35);
 }
@@ -92,32 +95,38 @@ h1 { margin: 0; font-size: clamp(28px, 4.5vmin, 44px); text-align: center; }
   justify-content: space-between;
   gap: var(--gap);
 }
-.topbar h1 {
-  color: #fff;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
-}
-.spacer { width: var(--tap); }
+.topbar h1 { color: #fff; text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45); }
+.topbar .mascot { font-size: 64px; }
+.topbar-right { display: flex; gap: 12px; }
 
-/* ---------- Mascotte ---------- */
+/* ---------- Mascotte en aanwijzers ---------- */
 
-.mascot-row { display: flex; align-items: center; gap: var(--gap); width: 100%; }
-.mascot { font-size: clamp(64px, 11vmin, 110px); line-height: 1; animation: bob 3s ease-in-out infinite; }
-.bubble {
-  flex: 1;
-  position: relative;
-  background: #fff8d6;
-  border: 3px solid var(--accent-dark);
-  border-radius: var(--radius);
-  padding: 14px 20px;
-  font-size: clamp(22px, 3.4vmin, 32px);
-  font-weight: 600;
-  line-height: 1.3;
+.mascot { font-size: clamp(64px, 11vmin, 110px); line-height: 1; display: inline-block; animation: bob 3s ease-in-out infinite; }
+.mascot.big { font-size: clamp(100px, 16vmin, 160px); }
+.mascot.happy { animation: happy 0.6s ease-out 2; }
+.mascot.think { animation: think 0.8s ease-in-out; }
+
+.point-right, .point-down {
+  font-size: clamp(56px, 9vmin, 88px);
+  line-height: 1;
+  pointer-events: none;
 }
-.bubble p { margin: 0; }
-.bubble p + p { margin-top: 8px; }
-.feedback.good { color: var(--good); font-size: 1.15em; }
-.feedback.retry { color: var(--retry); }
-.hint { color: var(--muted); font-weight: 500; }
+.point-right { animation: nudge-right 1s ease-in-out infinite; }
+.point-down { position: absolute; top: -56px; left: 50%; animation: nudge-down 1s ease-in-out infinite; }
+
+/* Wijzende hand op een antwoordknop of steen */
+.pointer-hand {
+  position: absolute;
+  right: -10px;
+  bottom: -34px;
+  font-size: 56px;
+  line-height: 1;
+  pointer-events: none;
+  z-index: 3;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.35));
+  animation: tap 1s ease-in-out infinite;
+}
+.stone .pointer-hand { right: auto; left: 50%; margin-left: -20px; bottom: -44px; font-size: 44px; }
 
 /* ---------- Knoppen ---------- */
 
@@ -137,7 +146,6 @@ h1 { margin: 0; font-size: clamp(28px, 4.5vmin, 44px); text-align: center; }
   gap: 16px;
 }
 .big-button:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--accent-dark); }
-.big-button.secondary { background: #e3f1e5; box-shadow: 0 6px 0 #a9cdb0; }
 
 .icon-button {
   width: var(--tap);
@@ -149,44 +157,128 @@ h1 { margin: 0; font-size: clamp(28px, 4.5vmin, 44px); text-align: center; }
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   font-size: 40px;
 }
+.icon-button:disabled { opacity: 0.4; }
 
-.area-button { width: 100%; min-height: 140px; font-size: clamp(32px, 5vmin, 48px); }
-.area-emoji { font-size: 1.6em; }
+/* Klein en onopvallend: voor ouders */
+.small-corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 64px;
+  height: 64px;
+  font-size: 28px;
+  opacity: 0.75;
+}
+
+/* Grote ronde speel-/verderknop met driehoek */
+.play-button {
+  width: clamp(170px, 26vmin, 240px);
+  height: clamp(170px, 26vmin, 240px);
+  flex: none;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 10px 0 var(--accent-dark), 0 14px 30px rgba(0, 0, 0, 0.3);
+  display: grid;
+  place-items: center;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+.play-button:active { transform: translateY(6px); box-shadow: 0 4px 0 var(--accent-dark); animation: none; }
+.play-triangle {
+  width: 0;
+  height: 0;
+  margin-left: 14%;
+  border-style: solid;
+  border-width: clamp(42px, 6.5vmin, 60px) 0 clamp(42px, 6.5vmin, 60px) clamp(68px, 10vmin, 96px);
+  border-color: transparent transparent transparent var(--fg);
+}
+
+/* ---------- Startscherm ---------- */
+
+.start { gap: clamp(24px, 5vmin, 56px); }
+.play-row { display: flex; align-items: center; justify-content: center; gap: clamp(8px, 2vmin, 24px); }
 
 /* ---------- Missieselectie ---------- */
 
-.mission-list { display: flex; flex-direction: column; gap: var(--gap); width: 100%; }
-.mission-card {
+.mission-grid {
+  width: 100%;
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--gap);
-  min-height: 120px;
-  padding: 16px 24px;
-  border: 3px solid #cfe3d3;
-  border-radius: var(--radius);
-  background: #fff;
-  text-align: left;
-  box-shadow: 0 6px 0 #cfe3d3;
+  margin-top: 56px; /* ruimte voor de wijzende hand */
 }
-.mission-card:active { transform: translateY(4px); box-shadow: 0 2px 0 #cfe3d3; }
-.mission-emoji { font-size: 64px; }
-.mission-text { display: flex; flex-direction: column; gap: 4px; }
-.mission-text strong { font-size: clamp(24px, 3.6vmin, 34px); }
-.goal { font-size: clamp(18px, 2.6vmin, 24px); color: var(--muted); }
-
+.mission-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px 16px;
+  border: 4px solid #fff;
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--card);
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.18);
+}
+.mission-tile:active { transform: translateY(5px); box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18); }
+.mission-tile.suggested { border-color: var(--accent); animation: glow 1.6s ease-in-out infinite; }
 .stars { display: inline-flex; gap: 4px; font-size: 36px; white-space: nowrap; }
-.star { filter: grayscale(1); opacity: 0.3; }
+/* Nog niet verdiend: grijs en vaag, zodat 'al gelukt' alleen bij gouden sterren te zien is. */
+.star { filter: grayscale(1); opacity: 0.25; }
 .star.on { filter: none; opacity: 1; }
+.tile-title { font-size: clamp(15px, 2.2vmin, 20px); font-weight: 600; color: var(--muted); text-align: center; }
+
+.scene {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius);
+  overflow: hidden;
+  font-size: clamp(44px, 8vmin, 80px);
+  line-height: 1;
+}
+.scene > span { position: absolute; }
+.scene-voetstappen { background: linear-gradient(#cdeccd, #9fd49a); }
+.scene-voetstappen .p1 { left: 8%; bottom: 8%; transform: rotate(-20deg); }
+.scene-voetstappen .p2 { left: 34%; bottom: 32%; transform: rotate(-10deg); }
+.scene-voetstappen .p3 { left: 58%; bottom: 56%; }
+.scene-voetstappen .scene-tree { right: 4%; top: 4%; font-size: 0.8em; }
+.scene-appelmand { background: linear-gradient(#ffe9c2, #ffd08a); }
+.scene-appelmand .basket-emoji { left: 50%; bottom: 6%; transform: translateX(-50%); font-size: 1.5em; }
+.scene-appelmand .a1 { left: 14%; top: 10%; }
+.scene-appelmand .a2 { left: 40%; top: 4%; }
+.scene-appelmand .a3 { right: 12%; top: 14%; }
+.scene-rivier { background: linear-gradient(#bfe6ff 0 30%, #42a5f5 30% 100%); }
+.scene-rivier .rock { width: 26%; height: 14%; bottom: 22%; border-radius: 50%; background: #cfd8dc; box-shadow: 0 5px 0 #90a4ae; }
+.scene-rivier .r1 { left: 4%; }
+.scene-rivier .r2 { left: 37%; }
+.scene-rivier .r3 { left: 70%; }
+.scene-rivier .scene-frog { left: 40%; bottom: 34%; }
 
 /* ---------- Missie ---------- */
 
 .dots { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 .dot { width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 255, 255, 0.55); border: 3px solid #fff; }
 .dot.now { background: var(--accent); transform: scale(1.2); }
-.dot.done { background: var(--good); }
+.dot.done { background: var(--good); animation: pop 0.4s ease-out; }
 
-.mission-card-body { position: relative; }
+.mascot-row { display: flex; align-items: center; gap: var(--gap); width: 100%; position: relative; }
+.mode-badge {
+  position: absolute;
+  left: clamp(60px, 10vmin, 100px);
+  top: -14px;
+  font-size: 44px;
+  animation: pop 0.4s ease-out;
+}
+/* Tekst is alleen ondersteuning (voor wie kan lezen of voorleest); niet nodig om verder te kunnen. */
+.caption { flex: 1; font-size: clamp(17px, 2.4vmin, 22px); color: var(--muted); line-height: 1.3; }
+.caption p { margin: 0; }
+.caption p + p { margin-top: 4px; }
+.feedback.good { color: var(--good); font-weight: 700; }
+.feedback.retry { color: var(--retry); font-weight: 600; }
+
+/* Voorbeeld voordoen: niet aanraakbaar, gele rand */
+.mode-demo-watch .answers { pointer-events: none; }
+.mode-demo-watch, .mode-demo-try { outline: 6px dashed var(--accent); outline-offset: -6px; }
 
 .visual { width: 100%; display: flex; justify-content: center; min-height: 80px; }
 
@@ -201,10 +293,34 @@ h1 { margin: 0; font-size: clamp(28px, 4.5vmin, 44px); text-align: center; }
   flex-direction: column;
   align-items: center;
 }
-.item-number { font-size: 20px; font-weight: 700; color: var(--muted); }
-.items.dots .item { font-size: clamp(28px, 4.5vmin, 44px); }
+.item-number { font-size: 20px; font-weight: 700; color: var(--fg); animation: pop 0.3s ease-out; }
+.items.dots .item { font-size: clamp(24px, 4vmin, 40px); }
 
-.big-question { font-size: 80px; }
+.count-scene { display: flex; align-items: center; gap: var(--gap); }
+.qmark {
+  flex: none;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: grid;
+  place-items: center;
+  font-size: 52px;
+  font-weight: 900;
+}
+
+.match-scene { display: flex; flex-direction: column; align-items: center; gap: var(--gap); }
+.sign {
+  min-width: 160px;
+  padding: 8px 28px;
+  border-radius: 16px;
+  background: #a1662f;
+  box-shadow: 0 8px 0 #6d4320;
+  color: #fff;
+  font-size: clamp(72px, 12vmin, 112px);
+  font-weight: 900;
+  text-align: center;
+}
 
 .sum { display: flex; flex-direction: column; align-items: center; gap: var(--gap); }
 .basket {
@@ -221,10 +337,33 @@ h1 { margin: 0; font-size: clamp(28px, 4.5vmin, 44px); text-align: center; }
 .plus { font-size: 56px; font-weight: 800; }
 .equation { font-size: clamp(40px, 7vmin, 72px); font-weight: 800; letter-spacing: 0.04em; }
 
+.jump-scene { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: var(--gap); }
+.jump-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  background: #e3f2fd;
+  border: 4px solid #64b5f6;
+}
+.jump-card .arrow { font-size: 56px; line-height: 1; }
+.jump-card.back { flex-direction: row-reverse; }
+.hops { display: flex; gap: 6px; }
+.hop-arc {
+  width: 36px;
+  height: 22px;
+  border: 6px solid var(--good);
+  border-bottom: 0;
+  border-radius: 36px 36px 0 0;
+}
+.jump-count { font-size: 48px; font-weight: 900; }
+
 .answers { width: 100%; display: flex; justify-content: center; }
 
-.choices { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(16px, 3vmin, 32px); }
+.choices { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(16px, 3vmin, 32px); padding-bottom: 24px; }
 .choice {
+  position: relative;
   width: clamp(120px, 17vmin, 160px);
   height: clamp(120px, 17vmin, 160px);
   border: 0;
@@ -237,13 +376,27 @@ h1 { margin: 0; font-size: clamp(28px, 4.5vmin, 44px); text-align: center; }
 .choice:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 3px 0 var(--accent-dark); }
 .choice.wrong { background: #e4e4e4; color: #8a8a8a; box-shadow: 0 8px 0 #c4c4c4; }
 .choice.right { background: var(--good); color: #fff; box-shadow: 0 8px 0 #1b5e20; animation: pop 0.4s ease-out; }
+.choice.right::after, .stone.right::after {
+  content: '✔';
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--good);
+  font-size: 30px;
+  line-height: 44px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
 
 /* Rivier met stenen 0–10 */
 .river {
   width: 100%;
   display: flex;
   gap: 4px;
-  padding: 28px 8px 16px;
+  padding: 28px 8px 44px;
   border-radius: var(--radius);
   background: linear-gradient(#64b5f6, #1e88e5);
 }
@@ -267,52 +420,69 @@ h1 { margin: 0; font-size: clamp(28px, 4.5vmin, 44px); text-align: center; }
 .stone.path { background: var(--accent); box-shadow: 0 6px 0 var(--accent-dark); }
 .stone.wrong { background: #b0bec5; color: #607d8b; box-shadow: 0 6px 0 #78909c; }
 .stone.right { background: var(--good); color: #fff; box-shadow: 0 6px 0 #1b5e20; }
+.stone.right::after { top: -18px; right: -6px; width: 32px; height: 32px; font-size: 22px; line-height: 32px; }
 .frog { position: absolute; top: -30px; font-size: clamp(40px, 6vmin, 56px); line-height: 1; }
 .frog.landed { animation: hop 0.5s ease-out; }
-.hop {
-  position: absolute;
-  top: 6px;
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--fg);
-}
+.hop { position: absolute; top: 6px; font-size: 18px; font-weight: 800; color: var(--fg); }
 
-.celebrate {
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  font-size: 140px;
-  pointer-events: none;
-  animation: celebrate 1.3s ease-out forwards;
-}
+/* Feest bij goed antwoord */
+.celebrate { position: absolute; inset: 0; pointer-events: none; overflow: hidden; border-radius: inherit; }
+.spark { position: absolute; left: 50%; top: 50%; font-size: 72px; opacity: 0; animation: burst 1.2s ease-out forwards; }
+.spark.s0 { --dx: -260px; --dy: -160px; }
+.spark.s1 { --dx: 240px; --dy: -180px; }
+.spark.s2 { --dx: -200px; --dy: 120px; }
+.spark.s3 { --dx: 220px; --dy: 140px; }
+.spark.s4 { --dx: 0px; --dy: -220px; }
+.spark.s5 { --dx: 0px; --dy: 0px; font-size: 140px; }
 
 /* ---------- Resultaat ---------- */
 
-.result .stars { font-size: 72px; }
-.reward { font-size: 120px; animation: pop 0.6s ease-out; }
-.result-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap); }
+.result .card { overflow: hidden; padding-top: 40px; }
+.result .stars { font-size: clamp(64px, 11vmin, 96px); }
+.result .star.on { animation: pop 0.5s ease-out both; }
+.result .star.on:nth-child(2) { animation-delay: 0.25s; }
+.result .star.on:nth-child(3) { animation-delay: 0.5s; }
+.reward-row { display: flex; align-items: flex-end; gap: var(--gap); }
+.reward { font-size: clamp(120px, 20vmin, 180px); line-height: 1; animation: pop 0.6s ease-out; }
+.result-actions { display: flex; align-items: center; justify-content: center; gap: clamp(24px, 6vmin, 64px); }
+.again { opacity: 0.85; }
+.confetti { position: absolute; inset: 0; pointer-events: none; }
+.confetti .c { position: absolute; top: -40px; font-size: 36px; animation: fall 2.4s ease-in forwards; }
+.confetti .c0 { left: 5%; } .confetti .c1 { left: 15%; animation-delay: 0.2s; }
+.confetti .c2 { left: 25%; animation-delay: 0.5s; } .confetti .c3 { left: 35%; animation-delay: 0.1s; }
+.confetti .c4 { left: 48%; animation-delay: 0.4s; } .confetti .c5 { left: 58%; animation-delay: 0.15s; }
+.confetti .c6 { left: 68%; animation-delay: 0.6s; } .confetti .c7 { left: 78%; animation-delay: 0.3s; }
+.confetti .c8 { left: 88%; animation-delay: 0.05s; } .confetti .c9 { left: 94%; animation-delay: 0.45s; }
 
 /* ---------- Animaties ---------- */
 
 .shake { animation: shake 0.4s ease-in-out; }
 
 @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes happy { 0%, 100% { transform: translateY(0) rotate(0); } 40% { transform: translateY(-24px) rotate(-8deg); } 70% { transform: translateY(0) rotate(8deg); } }
+@keyframes think { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-14deg); } 70% { transform: rotate(10deg); } }
 @keyframes pop { 0% { transform: scale(0.6); } 70% { transform: scale(1.12); } 100% { transform: scale(1); } }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+@keyframes glow { 0%, 100% { box-shadow: 0 8px 0 rgba(0, 0, 0, 0.18), 0 0 0 0 rgba(255, 211, 77, 0.9); } 50% { box-shadow: 0 8px 0 rgba(0, 0, 0, 0.18), 0 0 0 14px rgba(255, 211, 77, 0); } }
+@keyframes nudge-right { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(16px); } }
+@keyframes nudge-down { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 12px); } }
+@keyframes tap { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
 @keyframes hop { 0% { transform: translateY(20px) scale(0.8); } 60% { transform: translateY(-16px); } 100% { transform: translateY(0); } }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
-@keyframes celebrate {
+@keyframes burst {
   0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
-  30% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
-  100% { transform: translate(-50%, -80%) scale(1); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); opacity: 0; }
 }
+@keyframes fall { 0% { transform: translateY(0) rotate(0); opacity: 1; } 100% { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
-/* Smalle schermen (iPad mini staand): kaarten compacter */
+/* iPad mini staand: tegels iets compacter */
 @media (max-width: 800px) {
-  .mission-card { grid-template-columns: auto 1fr; }
-  .mission-card .stars { grid-column: 2; font-size: 28px; }
-  .mission-emoji { font-size: 52px; }
+  .mission-grid { gap: 12px; }
+  .stars { font-size: 26px; }
+  .scene { font-size: 48px; }
 }

@@ -23,3 +23,4 @@ __pycache__/
 *.db
 *.sqlite
 *.sqlite3
+e2e/output/

@@ -1,4 +1,5 @@
 import { el } from '../dom';
+import { pointerHand } from './pointer';
 import type { AnswerView } from './types';
 
 export interface JumpView extends AnswerView {
@@ -41,6 +42,7 @@ export function numberLine(v: JumpView, lastWrong?: number): HTMLElement {
       onPath ? el('span', { class: 'hop' }, String(Math.abs(n - v.start))) : null,
       n === frogAt ? el('span', { class: v.solved ? 'frog landed' : 'frog', 'aria-hidden': 'true' }, '🐸') : null,
       el('span', { class: 'stone-number' }, String(n)),
+      v.pointAt === n ? pointerHand() : null,
     );
     stone.addEventListener('click', () => v.onAnswer(n));
     river.append(stone);

@@ -1,4 +1,5 @@
 import { el } from '../dom';
+import { pointerHand } from './pointer';
 import type { AnswerView } from './types';
 
 /** Rij grote antwoordknoppen met getallen. */
@@ -16,6 +17,7 @@ export function choiceButtons(choices: readonly number[], answer: number, view: 
         'data-value': value,
       },
       String(value),
+      view.pointAt === value ? pointerHand() : null,
     );
     button.addEventListener('click', () => view.onAnswer(value));
     row.append(button);

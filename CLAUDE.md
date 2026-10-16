@@ -42,6 +42,11 @@ npm run check                # typecheck + tests + build, zoals CI
 - Lagen: `math` → `missions` → `state` (pure reducers) → `presentation` (DOM/canvas).
   Presentatie bevat geen rekenlogica; teksten voor het kind staan in `presentation/texts.ts`.
 - Geen tijdsdruk, geen strafpunten; altijd minstens één ster.
+- **Spelen zonder lezen** (fase 1.5): elke stap moet te begrijpen zijn via beeld, getallen,
+  beweging of de wijzende hand (👆/👉/👇). Tekst (`.caption`, titels) is alleen ondersteuning.
+  Spraak is optioneel en alleen via lokale stemmen (`localService`). Nieuwe soort opdracht =
+  voorbeeld in `missions/demos.ts` (voordoen → zelf proberen); acceptatietest `e2e/nonreading.cjs`
+  leest nooit tekst en moet blijven slagen.
 - Geen externe netwerkverzoeken (geen CDN, fonts, analytics).
 - Publieke repo: geen persoonsgegevens van het kind in code, commits of issues.
 - Opslagschema wijzigen = `SCHEMA_VERSION` ophogen en migratie toevoegen in `src/storage/`.

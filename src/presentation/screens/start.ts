@@ -1,26 +1,38 @@
-import { getallenbos } from '../../missions/getallenbos';
 import { bigButton, el } from '../dom';
 import { speak } from '../speech';
-import { MASCOT } from '../texts';
-import { mascotBubble } from './mascot';
+import { PLAY } from '../texts';
 import type { Screen } from './types';
 
-export function startScreen(onOpenArea: () => void): Screen {
-  const greeting = `Hoi! Ik ben ${MASCOT.name}. Gaan we samen naar ${getallenbos.name.toLowerCase()}?`;
-  const area = bigButton(
-    [el('span', { class: 'area-emoji', 'aria-hidden': 'true' }, getallenbos.emoji), el('span', {}, getallenbos.name)],
-    () => {
-      speak(`Op naar ${getallenbos.name.toLowerCase()}!`);
-      onOpenArea();
-    },
-    'big-button area-button',
-  );
+/**
+ * Startscherm met één duidelijke actie: de grote speelknop. De mascotte wijst
+ * ernaar. Het geluidsknopje is klein en zit in de hoek (voor ouders).
+ */
+export function startScreen(sound: boolean, onPlay: () => void, onToggleSound: () => boolean): Screen {
+  const soundButton = bigButton(sound ? '🔊' : '🔇', () => {
+    const on = onToggleSound();
+    soundButton.textContent = on ? '🔊' : '🔇';
+    soundButton.setAttribute('aria-pressed', String(on));
+    if (on) speak(PLAY);
+  }, 'icon-button small-corner');
+  soundButton.setAttribute('aria-label', 'Geluid');
+  soundButton.setAttribute('aria-pressed', String(sound));
+
+  const play = bigButton(el('span', { class: 'play-triangle', 'aria-hidden': 'true' }), onPlay, 'play-button');
+  play.setAttribute('aria-label', 'Spelen');
+
   return {
     el: el(
       'main',
       { class: 'screen start' },
+      soundButton,
       el('h1', { class: 'title' }, 'RekenWereld'),
-      el('div', { class: 'card' }, mascotBubble(greeting), area),
+      el(
+        'div',
+        { class: 'play-row' },
+        el('span', { class: 'mascot big', 'aria-hidden': 'true' }, '🦉'),
+        el('span', { class: 'point-right', 'aria-hidden': 'true' }, '👉'),
+        play,
+      ),
     ),
   };
 }

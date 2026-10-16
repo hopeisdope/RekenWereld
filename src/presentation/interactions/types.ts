@@ -5,5 +5,7 @@ export interface AnswerView {
   /** Goed antwoord gegeven: alles vergrendeld, goede optie gemarkeerd. */
   solved: boolean;
   showHint: boolean;
+  /** Toon een wijzende hand op deze optie (voorbeeld, of na herhaalde fouten). */
+  pointAt?: number;
   onAnswer(value: number): void;
 }

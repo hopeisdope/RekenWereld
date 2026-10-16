@@ -6,6 +6,8 @@ export interface SaveData {
   schemaVersion: number;
   /** Ingevuld door de spelstatus-module; hier bewust generiek. */
   progress: Record<string, unknown>;
+  /** Instellingen en welke uitleg al gezien is (optioneel; toegevoegd in fase 1.5). */
+  settings?: Record<string, unknown>;
   updatedAt: string;
 }
 

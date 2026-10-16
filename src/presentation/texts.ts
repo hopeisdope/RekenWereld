@@ -19,7 +19,7 @@ export function promptText(task: Task): string {
     case 'count':
       return 'Hoeveel voetstappen tel je?';
     case 'recognize':
-      return `Tik op het getal ${numberWord(a)}.`;
+      return `Zoek hetzelfde getal: ${numberWord(a)}.`;
     case 'add':
       return 'Hoeveel appels zijn het samen?';
     case 'jump':
@@ -35,7 +35,7 @@ export function hintText(task: Task): string {
     case 'count':
       return 'Tel ze één voor één. De getallen helpen je.';
     case 'recognize':
-      return `Kijk naar de stippen: zoveel is ${numberWord(task.exercise.answer)}.`;
+      return `Kijk goed naar het bordje: ${numberWord(task.exercise.answer)}.`;
     case 'add':
       return 'Tel alle appels samen. De getallen helpen je.';
     case 'jump':
@@ -53,3 +53,9 @@ export function praise(rng: () => number = Math.random): string {
 export function retry(rng: () => number = Math.random): string {
   return RETRY[Math.floor(rng() * RETRY.length)];
 }
+
+/** Gesproken (optioneel) bij het voordoen en zelf proberen van een voorbeeld. */
+export const DEMO_WATCH = 'Kijk, ik doe het voor!';
+export const DEMO_TRY = 'Nu jij!';
+export const PICK_MISSION = 'Tik op een plaatje om te spelen.';
+export const PLAY = 'Tik op de grote knop om te spelen!';

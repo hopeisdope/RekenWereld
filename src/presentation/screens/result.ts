@@ -1,7 +1,6 @@
 import type { Mission } from '../../missions/types';
 import { bigButton, el } from '../dom';
 import { speak } from '../speech';
-import { mascotBubble } from './mascot';
 import { starRow } from './select';
 import type { Screen } from './types';
 
@@ -11,9 +10,21 @@ const CHEERS: Record<1 | 2 | 3, string> = {
   3: 'Fantastisch! Jij bent een rekenheld!',
 };
 
-export function resultScreen(mission: Mission, stars: 1 | 2 | 3, onAgain: () => void, onBack: () => void): Screen {
-  const text = `Missie gelukt! ${CHEERS[stars]} Je hebt een nieuwe vriend gevonden.`;
-  speak(text);
+/**
+ * Beloning: sterren en een nieuw dier. Eén grote knop om verder te gaan
+ * (terug naar de missies), een klein knopje om opnieuw te spelen.
+ */
+export function resultScreen(mission: Mission, stars: 1 | 2 | 3, onAgain: () => void, onNext: () => void): Screen {
+  speak(`Missie gelukt! ${CHEERS[stars]}`);
+
+  const next = bigButton(el('span', { class: 'play-triangle', 'aria-hidden': 'true' }), onNext, 'play-button next');
+  next.setAttribute('aria-label', 'Verder');
+  const again = bigButton('🔁', onAgain, 'icon-button again');
+  again.setAttribute('aria-label', 'Nog een keer');
+
+  const confetti = el('div', { class: 'confetti', 'aria-hidden': 'true' });
+  for (let i = 0; i < 10; i++) confetti.append(el('span', { class: `c c${i}` }, ['🎉', '⭐', '✨', '🎈'][i % 4]));
+
   return {
     el: el(
       'main',
@@ -21,16 +32,10 @@ export function resultScreen(mission: Mission, stars: 1 | 2 | 3, onAgain: () => 
       el(
         'div',
         { class: 'card' },
-        el('h1', {}, 'Hoera! 🎉'),
-        mascotBubble(text),
+        confetti,
+        el('div', { class: 'reward-row' }, el('span', { class: 'mascot happy', 'aria-hidden': 'true' }, '🦉'), el('div', { class: 'reward', role: 'img', 'aria-label': 'Beloning' }, mission.reward)),
         starRow(stars),
-        el('div', { class: 'reward', role: 'img', 'aria-label': 'Beloning' }, mission.reward),
-        el(
-          'div',
-          { class: 'result-actions' },
-          bigButton('🔁 Nog een keer', onAgain, 'big-button secondary'),
-          bigButton('🌳 Terug naar het bos', onBack),
-        ),
+        el('div', { class: 'result-actions' }, again, next),
       ),
     ),
   };
