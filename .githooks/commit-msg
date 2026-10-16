@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Enforce project bookkeeping. Every commit must do one of:
+#   (a) touch a worklist / handoff doc (WORKLIST.md, MOBILE_WORKLIST.md, HANDOFF.md), or
+#   (b) reference a GitHub issue in the message (e.g. "Closes #42", or a bare "#42"), or
+#   (c) opt out for a genuine one-off with "[skip worklist]" in the message.
+# Bypass once with:  git commit --no-verify
+
+msg_file="$1"
+msg_content="$(cat "$msg_file")"
+first_line="$(printf '%s\n' "$msg_content" | sed -n '1p')"
+
+# Nothing to document for merges / reverts / rebase fixups.
+case "$first_line" in
+  "Merge "*|"Revert "*|"fixup! "*|"squash! "*|"amend! "*) exit 0 ;;
+esac
+
+# (c) explicit opt-out
+if printf '%s' "$msg_content" | grep -qiE '\[skip[ -]worklist\]'; then
+  exit 0
+fi
+
+# (b) issue reference anywhere in the message
+if printf '%s' "$msg_content" | grep -qE '#[0-9]+'; then
+  exit 0
+fi
+
+# (a) a bookkeeping doc is part of this commit
+if git diff --cached --name-only | grep -qE '(^|/)(WORKLIST|MOBILE_WORKLIST|HANDOFF)\.md$'; then
+  exit 0
+fi
+
+cat >&2 <<'EOF'
+✗ Commit rejected: no project bookkeeping.
+
+Every commit must do one of:
+  • update WORKLIST.md / MOBILE_WORKLIST.md / HANDOFF.md, or
+  • reference a GitHub issue in the message (e.g. "Closes #42"), or
+  • add "[skip worklist]" to the message for a genuine one-off.
+
+Bypass once with:  git commit --no-verify
+EOF
+exit 1
