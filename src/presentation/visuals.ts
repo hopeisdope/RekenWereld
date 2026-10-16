@@ -112,7 +112,8 @@ export function visual(task: Task, hint: boolean): HTMLElement {
         ),
       );
     case 'makeTen':
-      return el('div', { class: 'sum' }, concrete ? tenFrame(a, one, hint) : null, el('div', { class: 'equation' }, `${a} + ? = 10`));
+      // Bij slepen zit het tienveld in de bediening zelf.
+      return el('div', { class: 'sum' }, concrete && task.interaction !== 'drag' ? tenFrame(a, one, hint) : null, el('div', { class: 'equation' }, `${a} + ? = 10`));
     case 'jump': {
       const forward = task.exercise.operation === 'add';
       const hops = el('span', { class: 'hops' });

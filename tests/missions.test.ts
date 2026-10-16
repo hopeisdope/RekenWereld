@@ -76,9 +76,11 @@ describe('missies in het Getallenbos', () => {
     }
   });
 
-  it('appelmand ronde 1 blijft optellen tot 10 met minstens één per groep (regressie fase 1)', () => {
+  it('appelmand ronde 1: eerst hoeveelheid maken (slepen), dan optellen tot 10 met minstens één per groep', () => {
     for (let seed = 0; seed < 100; seed++) {
-      for (const t of buildRoundTasks(missions.appelmand, 0, seededRng(seed))) {
+      const tasks = buildRoundTasks(missions.appelmand, 0, seededRng(seed));
+      expect(tasks.slice(0, 2).map((t) => t.interaction)).toEqual(['drag', 'drag']);
+      for (const t of tasks.slice(2)) {
         expect(t.exercise.operation).toBe('add');
         expect(Math.min(...t.exercise.operands)).toBeGreaterThanOrEqual(1);
         expect(t.exercise.answer).toBeLessThanOrEqual(10);

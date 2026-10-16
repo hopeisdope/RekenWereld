@@ -1,13 +1,15 @@
-import type { PromptKind, Task } from '../missions/types';
+import type { Task } from '../missions/types';
 import type { Progress } from './progress';
+import { demoKey, type DemoKey } from './settings';
 
 /**
  * Moet er vóór deze opdracht eerst een voorbeeld worden voorgedaan?
  * Alleen de eerste keer dat een soort opdracht voorkomt en zolang het kind
  * dat voorbeeld nog niet heeft gezien.
  */
-export function demoNeeded(task: Task, seen: readonly PromptKind[]): PromptKind | null {
-  return seen.includes(task.prompt) ? null : task.prompt;
+export function demoNeeded(task: Task, seen: readonly DemoKey[]): DemoKey | null {
+  const key = demoKey(task);
+  return seen.includes(key) ? null : key;
 }
 
 /** Welke missie wijst de mascotte aan? De eerste die nog niet gespeeld is. */

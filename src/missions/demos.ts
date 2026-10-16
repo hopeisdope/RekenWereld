@@ -1,5 +1,6 @@
 import { choicesFor, levelOf } from '../math/skills';
 import type { Exercise, Operation, Rng } from '../math/types';
+import type { DemoKey } from '../state/settings';
 import type { PromptKind, Task, Theme } from './types';
 
 let counter = 0;
@@ -52,8 +53,9 @@ function answerOf(op: Operation, o: number[]): number {
   }
 }
 
-/** Voorbeeldopdracht voor een soort; telt niet mee voor de voortgang. */
-export function demoTask(kind: PromptKind, rng: Rng, theme: Theme = 'paws'): Task {
+/** Voorbeeldopdracht voor een soort + bediening; telt niet mee voor de voortgang. */
+export function demoTask(key: DemoKey, rng: Rng, theme: Theme = 'paws'): Task {
+  const [kind, interaction] = key.split('/') as [PromptKind, Task['interaction']];
   const { op, operands } = EXAMPLES[kind];
   const id = `demo-${kind}-${++counter}`;
   const exercise: Exercise = {
@@ -64,8 +66,7 @@ export function demoTask(kind: PromptKind, rng: Rng, theme: Theme = 'paws'): Tas
     ...(op === 'order' ? { steps: [...operands].sort((x, y) => x - y) } : {}),
   };
   const base = { id, prompt: kind, exercise, support: 'concrete' as const, theme };
-  if (kind === 'jump') return { ...base, interaction: 'numberline', line: { min: 0, max: 10 } };
-  if (kind === 'order') return { ...base, interaction: 'sequence' };
-  if (kind === 'build') return { ...base, interaction: 'drag' };
+  if (interaction === 'numberline') return { ...base, interaction, line: { min: 0, max: 10 } };
+  if (interaction === 'sequence' || interaction === 'drag') return { ...base, interaction };
   return { ...base, interaction: 'choice', choices: choicesFor(exercise, levelOf(SKILL_FOR[kind], 0), rng) };
 }

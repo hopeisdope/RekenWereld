@@ -1,42 +1,63 @@
 import { el } from '../dom';
-import { pointerHand } from './pointer';
-import type { AnswerView } from './types';
+import { flyFrom } from '../motion';
+import type { Interaction, InteractionContext, InteractionView } from './types';
 
 /**
- * Ordenen: tik de getallen van klein naar groot. Elk goed getal schuift naar
- * de volgende trede van de trap; de trap zelf laat zien "klein → groot".
+ * Ordenen: tik de getallen van klein naar groot. Elk goed getal vliegt naar
+ * de volgende trede van de trap; de trap zelf laat "klein → groot" zien.
  */
-export function sequenceTiles(numbers: readonly number[], placed: readonly number[], view: AnswerView, lastWrong?: number): HTMLElement {
+export function sequenceInteraction(ctx: InteractionContext): Interaction {
+  const { operands, steps = [] } = ctx.task.exercise;
   const stairs = el('div', { class: 'stairs', 'aria-label': 'Van klein naar groot' });
-  numbers.forEach((_, i) => {
-    const value = placed[i];
-    stairs.append(
-      el(
-        'div',
-        { class: ['stair', value !== undefined && 'filled', i === placed.length && !view.solved && 'next'].filter(Boolean).join(' '), style: `--h:${i}` },
-        value !== undefined ? String(value) : '',
-      ),
-    );
-  });
+  const stairEls = operands.map((_, i) => el('div', { class: 'stair', style: `--h:${i}` }));
+  stairs.append(...stairEls);
 
   const tiles = el('div', { class: 'choices tiles', role: 'group', 'aria-label': 'Getallen' });
-  for (const value of numbers) {
-    const used = placed.includes(value);
-    const isWrong = view.wrong.includes(value);
-    const tile = el(
-      'button',
-      {
-        type: 'button',
-        class: ['choice', 'tile', used && 'used', isWrong && 'wrong', isWrong && value === lastWrong && 'shake'].filter(Boolean).join(' '),
-        disabled: used || isWrong || view.solved,
-        'data-value': value,
-        'aria-label': String(value),
-      },
-      String(value),
-      view.pointAt === value && !used ? pointerHand() : null,
-    );
-    tile.addEventListener('click', () => view.onAnswer(value));
+  const tileEls = new Map<number, HTMLButtonElement>();
+  let view: InteractionView = { wrong: [], solved: false, showHint: false, step: 0 };
+  let placed = 0;
+
+  for (const value of operands) {
+    const tile = el('button', { type: 'button', class: 'choice tile', 'data-value': value, 'aria-label': String(value) }, String(value));
+    tile.addEventListener('click', () => {
+      if (view.solved || tile.classList.contains('used') || view.wrong.includes(value)) return;
+      ctx.feedback?.('tap');
+      ctx.submit(value);
+    });
+    tileEls.set(value, tile);
     tiles.append(tile);
   }
-  return el('div', { class: 'sequence' }, stairs, tiles);
+
+  return {
+    el: el('div', { class: 'sequence' }, stairs, tiles),
+    update(v) {
+      view = v;
+      const done = v.solved ? steps.length : v.step;
+      for (let i = placed; i < done; i++) {
+        const tile = tileEls.get(steps[i])!;
+        const from = tile.getBoundingClientRect();
+        tile.classList.add('used');
+        tile.disabled = true;
+        stairEls[i].textContent = String(steps[i]);
+        stairEls[i].classList.add('filled');
+        flyFrom(stairEls[i], from);
+      }
+      placed = done;
+      stairEls.forEach((s, i) => s.classList.toggle('next', i === done && !v.solved));
+      for (const [value, tile] of tileEls) {
+        if (tile.classList.contains('used')) continue;
+        const isWrong = v.wrong.includes(value);
+        tile.classList.toggle('wrong', isWrong);
+        tile.disabled = isWrong || v.solved;
+        if (isWrong && value === v.lastWrong) {
+          tile.classList.remove('shake');
+          void tile.offsetWidth;
+          tile.classList.add('shake');
+        }
+      }
+    },
+    hintTarget() {
+      return view.solved ? null : (tileEls.get(steps[view.step]) ?? null);
+    },
+  };
 }

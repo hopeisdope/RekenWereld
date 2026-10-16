@@ -36,15 +36,20 @@ npm test            # unit-tests (Vitest)
 npm run check       # typecheck + tests + build, zoals CI
 ```
 
-### Acceptatietest zonder lezen (browser)
+### Browsertests (Playwright)
 
-Simuleert de hele flow (openen → spelen → missie kiezen → voorbeeld → oplossen → fout
-herstellen → afronden → andere missie) zonder ooit tekst te lezen: antwoorden worden alleen uit
-de plaatjes of de wijzende hand afgeleid. Vereist Playwright met Chromium.
+- `e2e/nonreading.cjs` — de hele flow zonder ooit tekst te lezen (openen → spelen → missie
+  kiezen → voorbeeld → oplossen → fout herstellen → afronden → andere missie → alle 9 rondes).
+  Antwoorden komen alleen uit de plaatjes, getallen en sommen of uit de wijzende hand.
+- `e2e/touch.cjs` — echt slepen, verkeerd loslaten, dubbel tikken, draaien van de iPad,
+  hervatten na 🏠 en na herladen, en "Beperk beweging" (liggend).
+
+Vereist Playwright met Chromium.
 
 ```bash
 npm run preview:pages        # terminal 1
 node e2e/nonreading.cjs      # terminal 2; screenshots in e2e/output/
+node e2e/touch.cjs
 ```
 
 ## Bouwen

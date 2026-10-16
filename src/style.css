@@ -580,3 +580,149 @@ h1 { margin: 0; font-size: clamp(28px, 4.5vmin, 44px); text-align: center; }
 .ten-frame .cell.full { background: #ffe9c2; }
 .ten-frame .cell.empty { border: 3px dashed #c8a46a; font-size: 24px; font-weight: 800; color: var(--muted); }
 .choices.groups .items.small .item { font-size: clamp(34px, 5.5vmin, 52px); }
+
+/* ---------- Fase 3: touch-interacties ---------- */
+
+/* Actieve opdracht: zachte gloed rond de antwoorden zolang het kind aan de beurt is */
+.mission-card-body.awaiting.mode-task .answers { border-radius: var(--radius); box-shadow: 0 0 0 4px rgba(255, 211, 77, 0.55); }
+.mission-card-body .answers { padding: 8px 4px; transition: box-shadow 0.3s; }
+.choice.pressed { transform: translateY(5px) scale(0.97); box-shadow: 0 3px 0 var(--accent-dark); }
+
+/* Zwevende wijzende hand */
+.float-hand {
+  position: absolute;
+  z-index: 20;
+  font-size: 60px;
+  line-height: 1;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-30%, -10%);
+  transition: left 0.45s ease, top 0.45s ease, opacity 0.2s;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.35));
+}
+.float-hand.show { opacity: 1; animation: tap 1s ease-in-out infinite; }
+
+/* Getallenlijn met springknoppen */
+.numberline { width: 100%; display: flex; flex-direction: column; align-items: center; gap: var(--gap); }
+.numberline .river { position: relative; display: block; padding: 64px 8px 14px; }
+.numberline .stones { display: flex; }
+.numberline .stone { min-height: 92px; margin: 0 2px; padding-bottom: 6px; }
+.numberline .river.long .stone { min-height: 72px; margin: 0 1px; border-radius: 30% 30% 20% 20%; }
+.numberline .river.long .stone-number { font-size: clamp(15px, 2.3vmin, 24px); }
+.numberline .river.long .stone.five .stone-number { font-size: clamp(19px, 2.9vmin, 30px); }
+.numberline .stone.ten { box-shadow: 0 6px 0 #607d8b; }
+.numberline .stone.here { background: #fff; }
+.numberline .frog {
+  position: absolute;
+  top: 8px;
+  transform: translateX(-50%);
+  transition: left 0.24s cubic-bezier(.3,1.6,.5,1);
+  font-size: clamp(38px, 6vmin, 56px);
+  z-index: 2;
+}
+.numberline .frog.oops { animation: shake 0.4s ease-in-out; }
+.numberline .frog.landed { animation: hop 0.5s ease-out; }
+.arcs { position: absolute; left: 8px; right: 8px; top: 40px; height: 30px; pointer-events: none; }
+.arc {
+  position: absolute;
+  height: 26px;
+  /* Boog van het midden van de ene steen naar het midden van de volgende */
+  border: 5px solid var(--good);
+  border-bottom: 0;
+  border-radius: 40px 40px 0 0;
+}
+.arc.bwd { border-color: #ef6c00; }
+.arc-num { position: absolute; left: 50%; top: -22px; transform: translateX(-50%); font-size: 16px; font-weight: 900; color: var(--fg); background: #fff; border-radius: 10px; padding: 0 5px; }
+.hop-controls { display: flex; align-items: center; justify-content: center; gap: clamp(16px, 4vmin, 40px); }
+.hop-button {
+  width: clamp(96px, 14vmin, 120px);
+  height: clamp(96px, 14vmin, 120px);
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 8px 0 #b0bec5, 0 4px 14px rgba(0, 0, 0, 0.15);
+  font-size: clamp(44px, 7vmin, 60px);
+  display: grid;
+  place-items: center;
+}
+.hop-button:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 3px 0 #b0bec5; }
+.hop-button:disabled { opacity: 0.35; }
+.hop-button.confirm { background: #c8e6c9; color: var(--good); font-weight: 900; box-shadow: 0 8px 0 #81c784; }
+.hop-button.confirm.ready { background: var(--good); color: #fff; box-shadow: 0 8px 0 #1b5e20; animation: pulse 1.6s ease-in-out infinite; }
+
+/* Slepen of aantikken: mand/tienveld + voorraad */
+.drag-task { width: 100%; display: flex; flex-direction: column; align-items: center; gap: var(--gap); }
+.drop-zone {
+  display: grid;
+  grid-template-columns: repeat(5, auto);
+  gap: 8px;
+  padding: 14px;
+  border: 5px dashed #c8a46a;
+  border-radius: var(--radius);
+  background: #fff4e0;
+  transition: background 0.2s, transform 0.2s;
+}
+.drop-zone.twenty { grid-template-columns: repeat(10, auto); }
+.drop-zone.over { background: #e8f5e9; border-color: var(--good); transform: scale(1.03); }
+.drop-zone.full-bump { animation: shake 0.4s ease-in-out; }
+.drop-zone.solved { border-style: solid; border-color: var(--good); background: #e8f5e9; }
+.slot {
+  position: relative;
+  width: clamp(54px, 8.5vmin, 76px);
+  height: clamp(54px, 8.5vmin, 76px);
+  border-radius: 14px;
+  border: 3px dashed #d7b98a;
+  background: rgba(255, 255, 255, 0.7);
+  font-size: clamp(34px, 5.5vmin, 50px);
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.drop-zone.twenty .slot { width: clamp(40px, 6.2vmin, 64px); height: clamp(40px, 6.2vmin, 64px); font-size: clamp(26px, 4vmin, 40px); }
+.slot.fixed { border-style: solid; border-color: #ffcc80; background: #ffe9c2; }
+.slot.placed { border-style: solid; border-color: #81c784; background: #f1f8e9; }
+.slot.pop { animation: pop 0.3s ease-out; }
+.slot:disabled { opacity: 1; }
+.slot-number { position: absolute; bottom: -2px; right: 4px; font-size: 16px; font-weight: 900; color: var(--fg); }
+.tray-row { display: flex; align-items: center; justify-content: center; gap: var(--gap); width: 100%; }
+.tray {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  min-height: 92px;
+  padding: 10px;
+  border-radius: var(--radius);
+  background: #efe3cf;
+}
+.drag-item {
+  width: clamp(64px, 9.5vmin, 84px);
+  height: clamp(64px, 9.5vmin, 84px);
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 0 #d7c3a3;
+  font-size: clamp(40px, 6.5vmin, 56px);
+  padding: 0;
+  touch-action: none; /* slepen zonder dat de pagina scrolt */
+}
+.drag-item.lifted { opacity: 0.3; }
+.drag-ghost {
+  position: fixed;
+  z-index: 100;
+  font-size: 64px;
+  line-height: 1;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(1.15);
+  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.3));
+}
+
+/* Liggend op een lage iPad: alles iets compacter zodat de knoppen in beeld blijven */
+@media (max-height: 820px) and (orientation: landscape) {
+  .mission .mascot { font-size: 56px; }
+  .equation { font-size: 40px; }
+  .choice { width: 112px; height: 112px; font-size: 56px; }
+  .hop-button { width: 92px; height: 92px; font-size: 44px; }
+  .numberline .river { padding-top: 56px; }
+}

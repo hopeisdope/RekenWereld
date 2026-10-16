@@ -36,12 +36,12 @@ export const appelmand: Mission = {
   emoji: '🍎',
   theme: 'apples',
   rounds: [
-    // 1. Optellen met appels, daarna alleen met getallen
-    { reward: '🦔', specs: [c('add', 0), c('add', 0), c('add', 1), c('add', 1), a('add', 1), a('add', 1)] },
+    // 1. Hoeveelheid maken (slepen), dan optellen met appels, daarna alleen met getallen
+    { reward: '🦔', specs: [c('build', 0), c('build', 1), c('add', 0), c('add', 1), a('add', 1), a('add', 1)] },
     // 2. Aftrekken (appels opeten)
     { reward: '🐛', specs: [c('subtract', 0), c('subtract', 0), c('subtract', 1), c('subtract', 1), a('subtract', 1), a('subtract', 1)] },
     // 3. Splitsen en aanvullen tot 10
-    { reward: '🐞', specs: [c('split', 0), c('split', 1), a('split', 1), c('makeTen', 0), c('makeTen', 1), a('makeTen', 1)] },
+    { reward: '🐞', specs: [c('split', 0), c('split', 1), a('split', 1), c('makeTen', 0, { interaction: 'drag' }), c('makeTen', 1, { interaction: 'drag' }), a('makeTen', 1)] },
   ],
 };
 

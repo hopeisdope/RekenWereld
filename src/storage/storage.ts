@@ -8,6 +8,8 @@ export interface SaveData {
   progress: Record<string, unknown>;
   /** Instellingen en welke uitleg al gezien is (optioneel; toegevoegd in fase 1.5). */
   settings?: Record<string, unknown>;
+  /** Onderbroken missieronde om te hervatten (optioneel; fase 3). */
+  resume?: unknown;
   updatedAt: string;
 }
 

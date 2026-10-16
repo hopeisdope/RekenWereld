@@ -1,37 +1,57 @@
 import { el } from '../dom';
-import { pointerHand } from './pointer';
-import type { AnswerView } from './types';
+import type { Interaction, InteractionContext, InteractionView } from './types';
+
+export interface ChoiceOptions {
+  /** Inhoud van een knop; standaard het getal. */
+  label?: (value: number) => Node | string;
+  extraClass?: string;
+}
 
 /**
- * Rij grote antwoordknoppen. Standaard staat er een getal op; met `label`
- * kan een knop ook iets anders tonen (bv. een groepje voorwerpen).
+ * Grote antwoordknoppen. Direct na een tik krijgt de knop een "ingedrukt"
+ * toestand; daarna groen (goed) of grijs en schudden (fout). Na een goed
+ * antwoord zijn alle knoppen vergrendeld, zodat een tweede tik niets doet.
  */
-export function choiceButtons(
-  choices: readonly number[],
-  answer: number,
-  view: AnswerView,
-  lastWrong?: number,
-  label: (value: number) => Node | string = String,
-  extraClass = '',
-): HTMLElement {
-  const row = el('div', { class: `choices ${extraClass}`, role: 'group', 'aria-label': 'Antwoorden' });
+export function choiceInteraction(ctx: InteractionContext, opts: ChoiceOptions = {}): Interaction {
+  const { exercise, choices = [] } = ctx.task;
+  const label = opts.label ?? String;
+  const row = el('div', { class: `choices ${opts.extraClass ?? ''}`, role: 'group', 'aria-label': 'Antwoorden' });
+  const buttons = new Map<number, HTMLButtonElement>();
+  let view: InteractionView = { wrong: [], solved: false, showHint: false, step: 0 };
+
   for (const value of choices) {
-    const isWrong = view.wrong.includes(value);
-    const isAnswer = view.solved && value === answer;
-    const button = el(
-      'button',
-      {
-        type: 'button',
-        class: ['choice', isWrong && 'wrong', isWrong && value === lastWrong && 'shake', isAnswer && 'right'].filter(Boolean).join(' '),
-        disabled: isWrong || view.solved,
-        'data-value': value,
-        'aria-label': String(value),
-      },
-      label(value),
-      view.pointAt === value ? pointerHand() : null,
-    );
-    button.addEventListener('click', () => view.onAnswer(value));
+    const button = el('button', { type: 'button', class: 'choice', 'data-value': value, 'aria-label': String(value) }, label(value));
+    button.addEventListener('click', () => {
+      if (view.solved || view.wrong.includes(value)) return;
+      button.classList.add('pressed');
+      ctx.feedback?.('tap');
+      ctx.submit(value);
+      button.classList.remove('pressed');
+    });
+    buttons.set(value, button);
     row.append(button);
   }
-  return row;
+
+  return {
+    el: row,
+    update(v) {
+      view = v;
+      for (const [value, button] of buttons) {
+        const isWrong = v.wrong.includes(value);
+        button.classList.toggle('wrong', isWrong);
+        button.classList.toggle('right', v.solved && value === exercise.answer);
+        button.disabled = isWrong || v.solved;
+        if (isWrong && value === v.lastWrong) {
+          button.classList.remove('shake');
+          void button.offsetWidth; // animatie opnieuw starten
+          button.classList.add('shake');
+        }
+      }
+      // Bij een hint krijgen keuzes met voorwerpen (vergelijken) getallen erbij.
+      if (opts.label) for (const [value, button] of buttons) button.replaceChildren(label(value));
+    },
+    hintTarget() {
+      return view.solved ? null : (buttons.get(exercise.answer) ?? null);
+    },
+  };
 }

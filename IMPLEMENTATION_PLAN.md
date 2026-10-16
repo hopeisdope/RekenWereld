@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN — RekenWereld
 
-Status: **Fase 2 afgerond** (rekenengine en visuele didactiek). Laatst bijgewerkt: 2026-10-16.
+Status: **Fase 3 afgerond** (touch-interacties). Laatst bijgewerkt: 2026-10-16.
 
 ## 1. Uitgangssituatie (fase 0-inventarisatie)
 
@@ -220,9 +220,23 @@ Nog niet geverifieerd: echte deploy op Pages, gedrag op een fysieke iPad.
    - Nieuwe beelden: telrij met gat, trap (klein → groot), groepjes vergelijken, opeten
      (aftrekken), splitshuis, tienveld. Voorbeeld per nieuwe soort, ook meerstaps.
    - ESLint toegevoegd (`npm run lint`, ook in CI).
-6. **Fase 3 – touch-interacties**: herbruikbare knoppen, slepen/aantikken, getallenlijn met stappen.: slepen (Pointer Events), aftrekken in eigen missie,
+6. **Fase 3** ✅ touch-interacties
+   - Bedieningsvormen zijn componenten (`presentation/interactions/*`) met eigen toestand en
+     `hintTarget()` = de volgende goede tik. Daarop draaien voordoen (mascotte tikt), de hulphand
+     na 5 s niets doen en de hand na 2 fouten — voor alle vormen hetzelfde.
+   - Grote knoppen: ingedrukt-toestand, groen/grijs + schudden, vergrendeld na goed antwoord.
+   - Slepen of aantikken (mand/tienveld): vakjes zichtbaar, mand licht op als je erboven bent,
+     verkeerd/naast loslaten of vol → voorwerp schudt en gaat terug; tik op gelegd = terug.
+     Pure regels in `state/placement.ts`. Gebruikt bij "leg n in de mand" en "aanvullen tot 10".
+   - Getallenlijn: ⬅️/➡️ = één sprong per tik (of tik een steen: stap-voor-stap), genummerde
+     boogjes, ✔ bevestigt; na een fout springt de kikker terug. Geen automatische animatie die
+     het antwoord verraadt. Ook 0–20.
+   - Hervatten: tussenstand na elke opdracht en bij 🏠 (`state/resume.ts`); na herladen verder.
+   - Voorbeelden per soort + bediening (`DemoKey`, bv. `makeTen/drag`).
+   - Beperk beweging: animaties uit, sprongen direct.
+7. **Fase 4 – avonturenwereld**: kaart, statussen, verzamelobjecten, ontgrendelen, geluid.: slepen (Pointer Events), aftrekken in eigen missie,
    Playwright-rooktest (iPad-viewport, touch) in CI.
-6. **Fase 3 – wereld**: canvas-wereldkaart met gebieden, ontgrendelen, animaties, audio.
+8. **Later – wereld uitbreiden**: canvas-wereldkaart met gebieden, ontgrendelen, animaties, audio.
 7. **Fase 4 – afronding MVP**: ouder-menu, persist-verzoek, testen op iPad en iPad mini, offline-test.
 8. **Later**: splitsen, patronen, vormen, meten, dagelijks leven; export/import van voortgang.
 

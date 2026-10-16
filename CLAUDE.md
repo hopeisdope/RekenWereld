@@ -49,7 +49,9 @@ npm run check                # lint + typecheck + tests + build, zoals CI
   beweging of de wijzende hand (👆/👉/👇). Tekst (`.caption`, titels) is alleen ondersteuning.
   Spraak is optioneel en alleen via lokale stemmen (`localService`). Nieuwe soort opdracht =
   voorbeeld in `missions/demos.ts` (voordoen → zelf proberen); acceptatietest `e2e/nonreading.cjs`
-  leest nooit tekst en moet blijven slagen.
+  leest nooit tekst en moet blijven slagen, net als `e2e/touch.cjs`.
+- Nieuwe bedieningsvorm = `Interaction` (`presentation/interactions/types.ts`) met `hintTarget()`;
+  slepen altijd met tik-alternatief; respecteer `reducedMotion()`.
 - Geen externe netwerkverzoeken (geen CDN, fonts, analytics).
 - Publieke repo: geen persoonsgegevens van het kind in code, commits of issues.
 - Opslagschema wijzigen = `SCHEMA_VERSION` ophogen en migratie toevoegen in `src/storage/`.

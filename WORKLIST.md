@@ -10,7 +10,7 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 
 ## Volgende
 
-- [ ] Fase 2: `e2e/nonreading.cjs` in CI draaien (Playwright als devDependency)
+- [ ] `e2e/nonreading.cjs` en `e2e/touch.cjs` in CI draaien (Playwright als devDependency)
 - [ ] Fase 3: canvas-wereldkaart, ontgrendelen, audio
 - [ ] Fase 4: ouder-menu, `navigator.storage.persist()`, voortgang wissen
 
@@ -23,6 +23,8 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 - Getal zoeken is nu 'hetzelfde getal vinden'; hoor-naar-symbool alleen met spraak. Voldoende?
 
 ## Klaar
+
+- [x] Fase 3: touch-interacties (knoppen, slepen/tikken, getallenlijn met stappen), hervatten (2026-10-16)
 
 - [x] Fase 2: rekenengine (10 vaardigheden, niveaus, afleiders), rondes, ESLint (2026-10-16)
 

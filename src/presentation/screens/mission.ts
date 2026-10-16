@@ -1,14 +1,17 @@
-import { expectedAt } from '../../math/check';
 import { buildRoundTasks } from '../../missions/build';
 import { demoTask } from '../../missions/demos';
-import type { Mission, PromptKind, Task } from '../../missions/types';
+import type { Mission, Task } from '../../missions/types';
 import { demoNeeded, shouldPointAtAnswer } from '../../state/guidance';
+import { snapshot, type ResumePoint } from '../../state/resume';
 import { currentTask, reduce, startSession, starsFor, type SessionState } from '../../state/session';
+import type { DemoKey } from '../../state/settings';
 import { bigButton, el } from '../dom';
-import { choiceButtons } from '../interactions/choices';
-import { numberLine } from '../interactions/numberline';
-import { sequenceTiles } from '../interactions/sequence';
-import type { AnswerView } from '../interactions/types';
+import { choiceInteraction } from '../interactions/choices';
+import { dragInteraction } from '../interactions/drag';
+import { PointingHand } from '../interactions/hand';
+import { numberLineInteraction } from '../interactions/numberline';
+import { sequenceInteraction } from '../interactions/sequence';
+import type { Interaction, InteractionContext } from '../interactions/types';
 import { speak, stopSpeaking } from '../speech';
 import { DEMO_TRY, DEMO_WATCH, hintText, praise, promptText, retry } from '../texts';
 import { compareLabel, visual } from '../visuals';
@@ -19,36 +22,45 @@ const CELEBRATE_MS = 1400;
 /** Tikken vlak na het tonen van een nieuwe opdracht negeren (dubbeltik-beveiliging). */
 const INPUT_GUARD_MS = 400;
 /** Voorbeeld: zo lang wijst de hand voordat de mascotte "tikt". */
-const DEMO_POINT_MS = 1600;
-/** Zelf proberen: na zo lang niets doen wijst de hand het antwoord aan. */
+const DEMO_POINT_MS = 1200;
+/** Zelf proberen: na zo lang niets doen wijst de hand de volgende tik aan. */
 const IDLE_POINT_MS = 5000;
 
+export type SoundKind = 'tap' | 'place' | 'drop-fail' | 'hop' | 'correct' | 'retry';
+
 export interface MissionCallbacks {
-  /** Soorten opdrachten waarvan het voorbeeld al gezien is. */
-  seenDemos(): readonly PromptKind[];
-  onDemoSeen(kind: PromptKind): void;
+  /** Voorbeelden die al gezien zijn. */
+  seenDemos(): readonly DemoKey[];
+  onDemoSeen(key: DemoKey): void;
+  /** Tussenstand voor hervatten (null = niets te hervatten). */
+  onProgress(point: ResumePoint | null): void;
   onFinish(stars: 1 | 2 | 3): void;
   onQuit(): void;
+  sound?(kind: SoundKind): void;
 }
 
 /**
  * Modus van het scherm:
  * - task:       gewone opdracht uit de missie
- * - demo-watch: de mascotte doet een voorbeeld voor (niet aanraakbaar)
+ * - demo-watch: de mascotte doet een voorbeeld voor (kind kijkt)
  * - demo-try:   het kind probeert hetzelfde soort voorbeeld zelf
  */
 type Mode = 'task' | 'demo-watch' | 'demo-try';
 
-export function missionScreen(mission: Mission, round: number, rng: () => number, cb: MissionCallbacks): Screen {
-  let session: SessionState = startSession(mission.id, buildRoundTasks(mission, round, rng));
+export function missionScreen(mission: Mission, round: number, rng: () => number, cb: MissionCallbacks, resume?: ResumePoint): Screen {
+  let session: SessionState = resume
+    ? startSession(mission.id, resume.tasks, resume.index, resume.firstTry)
+    : startSession(mission.id, buildRoundTasks(mission, round, rng));
   let practice: SessionState | null = null;
   let mode: Mode = 'task';
   let readyAt = 0;
   let lastWrong: number | undefined;
   let feedbackLine = '';
   let idlePoint = false;
-  /** Bij het voordoen: welke waarde de hand nu aanwijst. */
-  let demoPoint: number | undefined;
+  /** De mascotte tikt (voorbeeld): dan geen invoerbeveiliging. */
+  let demoActing = false;
+  let interaction: Interaction | null = null;
+  let shownTaskId = '';
   const timers = new Set<number>();
 
   const later = (ms: number, fn: () => void) => {
@@ -63,12 +75,23 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
     timers.clear();
   };
 
+  // ---------- Vaste opbouw ----------
+
   const progressDots = el('div', { class: 'dots', 'aria-hidden': 'true' });
-  const body = el('div', { class: 'card mission-card-body' });
-  const helpButton = bigButton('❓', () => mode === 'task' && session.phase === 'asking' && startDemo(currentTask(session).prompt), 'icon-button help');
+  const helpButton = bigButton('❓', () => mode === 'task' && session.phase === 'asking' && startDemo(demoNeededKey(currentTask(session))), 'icon-button help');
   helpButton.setAttribute('aria-label', 'Voordoen');
-  const home = bigButton('🏠', cb.onQuit, 'icon-button');
+  const home = bigButton('🏠', quit, 'icon-button');
   home.setAttribute('aria-label', 'Stoppen');
+
+  const mascot = el('span', { class: 'mascot', 'aria-hidden': 'true' }, '🦉');
+  const badge = el('span', { class: 'mode-badge', 'aria-hidden': 'true' });
+  const caption = el('div', { class: 'caption', 'aria-live': 'polite' });
+  const visualBox = el('div', { class: 'visual' });
+  const answersBox = el('div', { class: 'answers' });
+  const celebrate = el('div', { class: 'celebrate', 'aria-hidden': 'true' });
+  const body = el('div', { class: 'card mission-card-body' }, el('div', { class: 'mascot-row' }, mascot, badge, caption), visualBox, answersBox, celebrate);
+  const hand = new PointingHand(body);
+
   const root = el(
     'main',
     { class: `screen mission mission-${mission.id}` },
@@ -78,6 +101,7 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
 
   /** De sessie die nu getoond wordt: oefening (voorbeeld) of de echte missie. */
   const active = (): SessionState => (mode === 'task' ? session : practice!);
+  const demoNeededKey = (task: Task): DemoKey => demoNeeded(task, []) as DemoKey;
 
   function spokenText(): string {
     const s = active();
@@ -88,38 +112,45 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
     return mode === 'demo-try' ? `${DEMO_TRY} ${promptText(task)}` : promptText(task);
   }
 
+  function quit(): void {
+    cb.onProgress(snapshot(session, round));
+    cb.onQuit();
+  }
+
   // ---------- Voorbeeld voordoen en zelf proberen ----------
 
-  function startDemo(kind: PromptKind): void {
+  function startDemo(key: DemoKey): void {
     clearTimers();
     mode = 'demo-watch';
-    practice = startSession('demo', [demoTask(kind, rng, mission.theme)]);
+    practice = startSession('demo', [demoTask(key, rng, mission.theme)]);
     resetTaskUi();
     render();
     speak(spokenText());
-    demoStep(kind);
+    later(600, () => demoTap(key));
   }
 
-  /** De mascotte wijst en "tikt" stap voor stap (ordenen heeft meerdere stappen). */
-  function demoStep(kind: PromptKind): void {
-    const p = practice!;
-    const value = expectedAt(currentTask(p).exercise, p.step);
-    demoPoint = value;
-    render();
+  /** De mascotte wijst de volgende tik aan en "tikt" erop, tot het voorbeeld klaar is. */
+  function demoTap(key: DemoKey): void {
+    if (mode !== 'demo-watch') return;
+    const target = interaction?.hintTarget() ?? null;
+    hand.pointAt(target);
+    if (!target) {
+      later(300, () => demoTap(key)); // bv. de kikker springt nog
+      return;
+    }
     later(DEMO_POINT_MS, () => {
-      practice = reduce(practice!, { type: 'answer', taskId: currentTask(p).id, value });
-      demoPoint = undefined;
-      if (practice.phase === 'asking') {
-        render();
-        later(400, () => demoStep(kind));
+      demoActing = true;
+      target.click();
+      demoActing = false;
+      if (practice!.phase === 'asking') {
+        later(350, () => demoTap(key));
         return;
       }
-      feedbackLine = praise(rng);
-      render();
+      hand.pointAt(null);
       later(CELEBRATE_MS, () => {
-        // Nu het kind: een nieuw voorbeeld van dezelfde soort, met andere knopvolgorde.
+        // Nu het kind: een nieuw voorbeeld van dezelfde soort.
         mode = 'demo-try';
-        practice = startSession('demo', [demoTask(kind, rng, mission.theme)]);
+        practice = startSession('demo', [demoTask(key, rng, mission.theme)]);
         resetTaskUi();
         render();
         speak(spokenText());
@@ -129,7 +160,7 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
   }
 
   function finishDemo(): void {
-    cb.onDemoSeen(currentTask(practice!).prompt);
+    cb.onDemoSeen(demoNeededKey(currentTask(practice!)));
     mode = 'task';
     practice = null;
     resetTaskUi();
@@ -137,14 +168,15 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
     speak(promptText(currentTask(session)));
   }
 
+  /** Doet het kind een tijdje niets, dan wijst de hand de volgende tik aan. */
   function armIdlePointer(): void {
-    const s = active();
-    const marker = `${s.index}:${s.step}`;
+    const marker = `${mode}:${active().index}:${active().step}:${active().wrong.length}`;
     later(IDLE_POINT_MS, () => {
       const now = active();
-      if (mode === 'demo-try' && now.phase === 'asking' && `${now.index}:${now.step}` === marker) {
+      if (mode === 'demo-try' && now.phase === 'asking' && `${mode}:${now.index}:${now.step}:${now.wrong.length}` === marker) {
         idlePoint = true;
-        render();
+        updateHand();
+        later(1000, updateHand);
       }
     });
   }
@@ -155,15 +187,14 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
     lastWrong = undefined;
     feedbackLine = '';
     idlePoint = false;
-    demoPoint = undefined;
     readyAt = performance.now() + INPUT_GUARD_MS;
   }
 
-  /** Toon de huidige opdracht, of eerst een voorbeeld als dit soort opdracht nieuw is. */
+  /** Toon de huidige opdracht, of eerst een voorbeeld als deze bediening nieuw is. */
   function showCurrent(): void {
-    const kind = demoNeeded(currentTask(session), cb.seenDemos());
-    if (kind) {
-      startDemo(kind);
+    const key = demoNeeded(currentTask(session), cb.seenDemos());
+    if (key) {
+      startDemo(key);
       return;
     }
     resetTaskUi();
@@ -171,14 +202,16 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
     speak(promptText(currentTask(session)));
   }
 
-  function answer(value: number): void {
-    if (mode === 'demo-watch' || performance.now() < readyAt) return;
+  /** Antwoord vanuit een bedieningsvorm. */
+  function submit(value: number): void {
+    if (mode === 'demo-watch' && !demoActing) return;
+    if (!demoActing && performance.now() < readyAt) return;
     const s = active();
     const next = reduce(s, { type: 'answer', taskId: currentTask(s).id, value });
     if (next === s) return; // genegeerd: dubbeltik, al beantwoord, zelfde foute keuze
 
-    if (mode === 'demo-try') practice = next;
-    else session = next;
+    if (mode === 'task') session = next;
+    else practice = next;
 
     lastWrong = next.feedback === 'tryAgain' ? value : undefined;
     idlePoint = false;
@@ -189,17 +222,24 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
       return;
     }
     feedbackLine = next.feedback === 'correct' ? praise(rng) : retry(rng);
-    speak(spokenText());
+    cb.sound?.(next.feedback === 'correct' ? 'correct' : 'retry');
+    if (mode !== 'demo-watch') speak(spokenText());
     render();
 
-    if (next.phase !== 'correct') return;
+    if (next.phase !== 'correct') {
+      if (mode === 'demo-try') armIdlePointer();
+      return;
+    }
     if (mode === 'demo-try') {
       later(CELEBRATE_MS, finishDemo);
       return;
     }
+    if (mode === 'demo-watch') return; // demoTap gaat verder
+    cb.onProgress(snapshot(session, round));
     later(CELEBRATE_MS, () => {
       session = reduce(session, { type: 'next' });
       if (session.phase === 'finished') {
+        cb.onProgress(null);
         cb.onFinish(starsFor(session));
         return;
       }
@@ -209,10 +249,34 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
 
   // ---------- Weergave ----------
 
+  function makeInteraction(task: Task): Interaction {
+    const ctx: InteractionContext = { task, submit, feedback: (k) => cb.sound?.(k), changed: () => updateHand() };
+    switch (task.interaction) {
+      case 'numberline':
+        return numberLineInteraction(ctx);
+      case 'sequence':
+        return sequenceInteraction(ctx);
+      case 'drag':
+        return dragInteraction(ctx);
+      case 'choice':
+        return task.prompt === 'compare'
+          ? choiceInteraction(ctx, { label: (v) => compareLabel(task, active().showHint)(v), extraClass: 'groups' })
+          : choiceInteraction(ctx);
+    }
+  }
+
   function render(): void {
     const s = active();
     const task = currentTask(s);
     const solved = s.phase === 'correct';
+
+    // Nieuwe opdracht (of voorbeeld): bedieningsvorm opnieuw opbouwen.
+    if (task.id !== shownTaskId) {
+      interaction?.destroy?.();
+      interaction = makeInteraction(task);
+      answersBox.replaceChildren(interaction.el);
+      shownTaskId = task.id;
+    }
 
     progressDots.replaceChildren(
       ...session.tasks.map((_, i) =>
@@ -228,47 +292,29 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
     );
     helpButton.disabled = mode !== 'task';
 
-    const expected = expectedAt(task.exercise, s.step);
-    const pointAt =
-      mode === 'demo-watch' ? demoPoint : idlePoint || (!solved && shouldPointAtAnswer(s.wrong.length, optionCount(task, s))) ? expected : undefined;
-    const view: AnswerView = { wrong: s.wrong, solved, showHint: s.showHint, pointAt, onAnswer: answer };
-
-    const mood = solved ? 'happy' : s.feedback === 'tryAgain' ? 'think' : '';
-    const badge = mode === 'demo-watch' ? '👀' : mode === 'demo-try' ? '🙋' : '';
-
-    body.className = `card mission-card-body mode-${mode} prompt-${task.prompt}`;
-    body.replaceChildren(
-      el(
-        'div',
-        { class: 'mascot-row' },
-        el('span', { class: `mascot ${mood}`, 'aria-hidden': 'true' }, '🦉'),
-        badge ? el('span', { class: 'mode-badge', 'aria-hidden': 'true' }, badge) : null,
-        el(
-          'div',
-          { class: 'caption', 'aria-live': 'polite' },
-          el('p', { class: 'prompt' }, promptText(task)),
-          feedbackLine ? el('p', { class: s.feedback === 'correct' ? 'feedback good' : 'feedback retry' }, feedbackLine) : null,
-          s.showHint && !solved ? el('p', { class: 'hint' }, `💡 ${hintText(task)}`) : null,
-        ),
-      ),
-      el('div', { class: 'visual' }, visual(task, s.showHint)),
-      el('div', { class: 'answers' }, answers(task, s, view)),
-      ...(solved ? [celebration()] : []),
+    mascot.className = `mascot ${solved ? 'happy' : s.feedback === 'tryAgain' ? 'think' : ''}`;
+    badge.textContent = mode === 'demo-watch' ? '👀' : mode === 'demo-try' ? '🙋' : '';
+    caption.replaceChildren(
+      el('p', { class: 'prompt' }, promptText(task)),
+      ...(feedbackLine ? [el('p', { class: s.feedback === 'correct' ? 'feedback good' : 'feedback retry' }, feedbackLine)] : []),
+      ...(s.showHint && !solved ? [el('p', { class: 'hint' }, `💡 ${hintText(task)}`)] : []),
     );
+    body.className = `card mission-card-body mode-${mode} prompt-${task.prompt} interaction-${task.interaction} ${solved ? 'solved' : 'awaiting'}`;
+    visualBox.replaceChildren(visual(task, s.showHint));
+    interaction!.update({ wrong: s.wrong, lastWrong, solved, showHint: s.showHint, step: s.step });
+
+    celebrate.replaceChildren();
+    if (solved) for (let i = 0; i < 6; i++) celebrate.append(el('span', { class: `spark s${i}` }, i % 2 ? '✨' : '⭐'));
+    updateHand();
   }
 
-  function answers(task: Task, s: SessionState, view: AnswerView): HTMLElement {
-    const { exercise } = task;
-    if (task.interaction === 'numberline' && task.line) {
-      return numberLine({ ...view, ...task.line, start: exercise.operands[0], answer: exercise.answer }, lastWrong);
-    }
-    if (task.interaction === 'sequence') {
-      return sequenceTiles(exercise.operands, exercise.steps!.slice(0, s.phase === 'correct' ? exercise.steps!.length : s.step), view, lastWrong);
-    }
-    if (task.prompt === 'compare') {
-      return choiceButtons(task.choices ?? [], exercise.answer, view, lastWrong, compareLabel(task, s.showHint), 'groups');
-    }
-    return choiceButtons(task.choices ?? [], exercise.answer, view, lastWrong);
+  /** Hand tonen: tijdens voordoen, na lang niets doen, of na herhaalde fouten. */
+  function updateHand(): void {
+    if (mode === 'demo-watch') return; // demoTap bepaalt waar de hand staat
+    const s = active();
+    const task = currentTask(s);
+    const show = s.phase === 'asking' && (idlePoint || shouldPointAtAnswer(s.mistakes, optionCount(task, s)));
+    hand.pointAt(show ? (interaction?.hintTarget() ?? null) : null);
   }
 
   showCurrent();
@@ -277,6 +323,8 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
     el: root,
     destroy() {
       clearTimers();
+      interaction?.destroy?.();
+      hand.destroy();
       stopSpeaking();
     },
   };
@@ -284,14 +332,7 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
 
 /** Aantal opties waaruit gekozen kan worden (voor het besluit om de hand te tonen). */
 function optionCount(task: Task, s: SessionState): number {
-  if (task.interaction === 'numberline' && task.line) return task.line.max - task.line.min;
+  if (task.interaction === 'numberline' || task.interaction === 'drag') return 10;
   if (task.interaction === 'sequence') return task.exercise.operands.length - s.step;
   return task.choices?.length ?? 0;
-}
-
-/** Sterren die uit het midden wegspringen bij een goed antwoord. */
-function celebration(): HTMLElement {
-  const wrap = el('div', { class: 'celebrate', 'aria-hidden': 'true' });
-  for (let i = 0; i < 6; i++) wrap.append(el('span', { class: `spark s${i}` }, i % 2 ? '✨' : '⭐'));
-  return wrap;
 }

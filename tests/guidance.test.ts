@@ -6,17 +6,17 @@ import { demoTask } from '../src/missions/demos';
 import { getallenbos, missions } from '../src/missions/getallenbos';
 import type { PromptKind } from '../src/missions/types';
 import { demoNeeded, shouldPointAtAnswer, suggestedMission } from '../src/state/guidance';
-import { DEFAULT_SETTINGS, markDemoSeen, parseSettings } from '../src/state/settings';
+import { DEFAULT_SETTINGS, demoKey, markDemoSeen, parseSettings, type DemoKey } from '../src/state/settings';
 import { currentTask, reduce, startSession } from '../src/state/session';
 
 const KINDS: PromptKind[] = ['count', 'recognize', 'build', 'compare', 'order', 'missing', 'add', 'subtract', 'split', 'makeTen', 'jump'];
 
 describe('voorbeelden (voordoen en zelf proberen)', () => {
   it('elke soort opdracht in de missies heeft een geldig voorbeeld', () => {
-    const used = new Set(getallenbos.missionIds.flatMap((id) => [0, 1, 2].flatMap((r) => buildRoundTasks(missions[id], r, seededRng(1)).map((t) => t.prompt))));
-    for (const kind of [...used, ...KINDS]) {
-      const t = demoTask(kind, seededRng(2));
-      expect(t.prompt).toBe(kind);
+    const used = new Set(getallenbos.missionIds.flatMap((id) => [0, 1, 2].flatMap((r) => buildRoundTasks(missions[id], r, seededRng(1)).map(demoKey))));
+    for (const key of used) {
+      const t = demoTask(key, seededRng(2));
+      expect(demoKey(t)).toBe(key);
       expect(solve(t.exercise)).toBe(t.exercise.answer);
       if (t.interaction === 'choice') expect(t.choices).toContain(t.exercise.answer);
       if (t.interaction === 'numberline') expect(t.line).toBeDefined();
@@ -25,8 +25,9 @@ describe('voorbeelden (voordoen en zelf proberen)', () => {
   });
 
   it('een voorbeeld is op te lossen met de gewone missieflow', () => {
-    for (const kind of KINDS) {
-      let s = startSession('demo', [demoTask(kind, seededRng(3))]);
+    const keys: DemoKey[] = [...KINDS.map((k) => `${k}/choice` as DemoKey), 'jump/numberline', 'order/sequence', 'build/drag', 'makeTen/drag'];
+    for (const key of keys) {
+      let s = startSession('demo', [demoTask(key, seededRng(3))]);
       for (const v of currentTask(s).exercise.steps ?? [currentTask(s).exercise.answer]) s = reduce(s, { type: 'answer', taskId: currentTask(s).id, value: v });
       expect(s.phase).toBe('correct');
     }
@@ -34,15 +35,15 @@ describe('voorbeelden (voordoen en zelf proberen)', () => {
 
   it('voorbeeld alleen bij een nieuwe soort opdracht, daarna niet meer', () => {
     const task = buildRoundTasks(missions.appelmand, 0, seededRng(4))[0];
-    expect(demoNeeded(task, [])).toBe('add');
-    const seen = markDemoSeen(DEFAULT_SETTINGS, 'add').seenDemos;
+    expect(demoNeeded(task, [])).toBe('build/drag');
+    const seen = markDemoSeen(DEFAULT_SETTINGS, 'build/drag').seenDemos;
     expect(demoNeeded(task, seen)).toBeNull();
   });
 
   it('voetstappen introduceert tellen én getallen zoeken met elk een eigen voorbeeld', () => {
     const tasks = buildRoundTasks(missions.voetstappen, 0, seededRng(5));
-    let seen: PromptKind[] = [];
-    const demos: PromptKind[] = [];
+    let seen: DemoKey[] = [];
+    const demos: DemoKey[] = [];
     for (const t of tasks) {
       const k = demoNeeded(t, seen);
       if (k) {
@@ -50,20 +51,24 @@ describe('voorbeelden (voordoen en zelf proberen)', () => {
         seen = [...seen, k];
       }
     }
-    expect(demos).toEqual(['count', 'recognize']);
+    expect(demos).toEqual(['count/choice', 'recognize/choice']);
   });
 });
 
 describe('instellingen', () => {
+  it('oude opslag (alleen soort) wordt omgezet; de vernieuwde getallenlijn krijgt opnieuw een voorbeeld', () => {
+    expect(parseSettings({ seenDemos: ['count', 'add', 'jump', 'recognize'] }).seenDemos).toEqual(['count/choice', 'add/choice', 'recognize/choice']);
+  });
+
   it('leest kapotte of oude opslag veilig in', () => {
     expect(parseSettings(undefined)).toEqual(DEFAULT_SETTINGS);
-    expect(parseSettings({ sound: 'ja', seenDemos: ['add', 'onzin', 3] })).toEqual({ sound: true, seenDemos: ['add'] });
+    expect(parseSettings({ sound: 'ja', seenDemos: ['add/choice', 'onzin', 3, 'add/vliegen'] })).toEqual({ sound: true, seenDemos: ['add/choice'] });
     expect(parseSettings({ sound: false, seenDemos: 'add' })).toEqual({ sound: false, seenDemos: [] });
   });
 
   it('markDemoSeen voegt niet dubbel toe', () => {
-    const s = markDemoSeen(markDemoSeen(DEFAULT_SETTINGS, 'jump'), 'jump');
-    expect(s.seenDemos).toEqual(['jump']);
+    const s = markDemoSeen(markDemoSeen(DEFAULT_SETTINGS, 'jump/numberline'), 'jump/numberline');
+    expect(s.seenDemos).toEqual(['jump/numberline']);
   });
 });
 

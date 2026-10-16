@@ -5,7 +5,7 @@ import { missions } from '../src/missions/getallenbos';
 import { currentTask, reduce, startSession, starsFor, type SessionState } from '../src/state/session';
 
 function freshSession(): SessionState {
-  return startSession('appelmand', buildRoundTasks(missions.appelmand, 0, seededRng(1)));
+  return startSession('appelmand', buildRoundTasks(missions.appelmand, 1, seededRng(1)));
 }
 const answerOf = (s: SessionState) => currentTask(s).exercise.answer;
 const wrongOf = (s: SessionState) => currentTask(s).choices!.find((c) => c !== answerOf(s))!;
