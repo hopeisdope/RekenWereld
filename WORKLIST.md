@@ -5,7 +5,7 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 ## Nu
 
 - [ ] GitHub Pages inschakelen: Settings → Pages → Source = GitHub Actions (eigenaar)
-- [ ] `fase-0-setup` mergen naar `main` en eerste deploy verifiëren op `https://hopeisdope.github.io/RekenWereld/`
+- [ ] Eerste deploy verifiëren (na Pages inschakelen: workflow opnieuw draaien) op `https://hopeisdope.github.io/RekenWereld/`
 - [ ] App installeren en offline testen op een fysieke iPad
 
 ## Volgende

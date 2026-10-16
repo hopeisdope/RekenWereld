@@ -27,6 +27,11 @@ npm test                     # unit-tests
 npm run check                # typecheck + tests + build, zoals CI
 ```
 
+## Git
+- Na elke commit direct naar `main` pushen (`git push origin main`). Werk op `main`;
+  geen feature-branches tenzij daar expliciet om gevraagd wordt.
+- Elke push naar `main` publiceert naar GitHub Pages: draai vooraf `npm run check`.
+
 ## Conventies
 - Code-identifiers in het Engels; teksten voor het kind, comments en documentatie in het Nederlands.
 - `src/math` en `src/missions` blijven puur (geen DOM) en volledig unit-getest.
