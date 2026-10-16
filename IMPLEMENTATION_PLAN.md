@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN — RekenWereld
 
-Status: **Fase 3 afgerond** (touch-interacties). Laatst bijgewerkt: 2026-10-16.
+Status: **Fase 4 afgerond** (avonturenwereld en missieprogressie). Laatst bijgewerkt: 2026-10-16.
 
 ## 1. Uitgangssituatie (fase 0-inventarisatie)
 
@@ -234,7 +234,19 @@ Nog niet geverifieerd: echte deploy op Pages, gedrag op een fysieke iPad.
    - Hervatten: tussenstand na elke opdracht en bij 🏠 (`state/resume.ts`); na herladen verder.
    - Voorbeelden per soort + bediening (`DemoKey`, bv. `makeTen/drag`).
    - Beperk beweging: animaties uit, sprongen direct.
-7. **Fase 4 – avonturenwereld**: kaart, statussen, verzamelobjecten, ontgrendelen, geluid.: slepen (Pointer Events), aftrekken in eigen missie,
+7. **Fase 4** ✅ avonturenwereld en missieprogressie
+   - Uil Ollie als eigen SVG (`presentation/mascot.ts`) met houdingen: wijzen, blij, nadenken,
+     zwaaien, knipperen; overal dezelfde stijl. Op de kaart staat hij naast de aangewezen missie.
+   - Kaart van Het Getallenbos (`missions/map.ts` = data, `screens/map.ts` = tekenen): pad,
+     rivier, drie grote iconen zonder labels. Statussen in beeld: slotje (dicht), ring die zich
+     per ronde vult + ▶ (bezig/hervatten), vinkje (voltooid), 3 sterren = 3 rondes.
+   - Ontgrendelen (`state/world.ts`): ronde 1 van een missie opent de volgende; tik op een dichte
+     missie → slotje schudt, uil zwaait (geen straf). Uil/hand wijzen eerst een onderbroken ronde
+     aan, anders de open missie met de minste rondes (leerdoelen wisselen af).
+   - Verzamelobjecten: één dier per ronde (9), gevonden in kleur, anders als schaduw.
+   - Einde van een ronde: dier springt in beeld, nieuwe ster vliegt in de rij, 🔓 + icoon van
+     de nieuw geopende missie; één grote ▶ terug naar de kaart.
+   - Geluidjes via Web Audio (geen bestanden, geen netwerk), aan/uit met de geluidsknop.: slepen (Pointer Events), aftrekken in eigen missie,
    Playwright-rooktest (iPad-viewport, touch) in CI.
 8. **Later – wereld uitbreiden**: canvas-wereldkaart met gebieden, ontgrendelen, animaties, audio.
 7. **Fase 4 – afronding MVP**: ouder-menu, persist-verzoek, testen op iPad en iPad mini, offline-test.

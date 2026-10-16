@@ -1,4 +1,5 @@
 import { bigButton, el } from '../dom';
+import { mascot } from '../mascot';
 import { speak } from '../speech';
 import { PLAY } from '../texts';
 import type { Screen } from './types';
@@ -29,7 +30,7 @@ export function startScreen(sound: boolean, onPlay: () => void, onToggleSound: (
       el(
         'div',
         { class: 'play-row' },
-        el('span', { class: 'mascot big', 'aria-hidden': 'true' }, '🦉'),
+        mascot('point', 'start-owl'),
         el('span', { class: 'point-right', 'aria-hidden': 'true' }, '👉'),
         play,
       ),

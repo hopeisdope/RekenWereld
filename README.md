@@ -1,8 +1,10 @@
 # RekenWereld
 
 Nederlandstalige reken-PWA voor een kind van 6 jaar in groep 3, gemaakt voor iPad en iPad mini.
-Een avonturenwereld met gebieden en missies; eerste leerdoelen zijn tellen tot 20 en
-beginnen met optellen en aftrekken.
+Een avonturenwereld (Het Getallenbos) met drie missies van elk drie rondes: tellen, getallen
+herkennen, telrij, vergelijken, ordenen, optellen, aftrekken, splitsen en aanvullen tot 10.
+Alles is te spelen zonder te kunnen lezen: grote knoppen, slepen of tikken, een getallenlijn
+met springknoppen, voorbeelden die de uil voordoet en een wijzende hand.
 
 - Stack: TypeScript, Vite, HTML5 Canvas (wereld) + HTML/CSS (bediening), `localStorage`, PWA.
 - Geen backend: de app is een statische site op GitHub Pages.

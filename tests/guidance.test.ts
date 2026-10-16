@@ -5,7 +5,7 @@ import { buildRoundTasks } from '../src/missions/build';
 import { demoTask } from '../src/missions/demos';
 import { getallenbos, missions } from '../src/missions/getallenbos';
 import type { PromptKind } from '../src/missions/types';
-import { demoNeeded, shouldPointAtAnswer, suggestedMission } from '../src/state/guidance';
+import { demoNeeded, shouldPointAtAnswer } from '../src/state/guidance';
 import { DEFAULT_SETTINGS, demoKey, markDemoSeen, parseSettings, type DemoKey } from '../src/state/settings';
 import { currentTask, reduce, startSession } from '../src/state/session';
 
@@ -73,14 +73,6 @@ describe('instellingen', () => {
 });
 
 describe('aanwijzen', () => {
-  it('de hand wijst de eerste ongespeelde missie aan', () => {
-    const ids = getallenbos.missionIds;
-    expect(suggestedMission(ids, {})).toBe('voetstappen');
-    expect(suggestedMission(ids, { voetstappen: { roundsDone: 1, completed: true, bestStars: 1, timesPlayed: 1 } })).toBe('appelmand');
-    const all = Object.fromEntries(ids.map((id) => [id, { roundsDone: 1, completed: true, bestStars: 3 as const, timesPlayed: 1 }]));
-    expect(suggestedMission(ids, all)).toBe('voetstappen');
-  });
-
   it('na twee fouten bij veel keuzes wijst de hand het antwoord aan; niet bij drie knoppen', () => {
     expect(shouldPointAtAnswer(1, 10)).toBe(false);
     expect(shouldPointAtAnswer(2, 10)).toBe(true);

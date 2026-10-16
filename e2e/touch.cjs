@@ -30,6 +30,11 @@ const { sleep, tap } = h;
       if (idx === 3 && resumeIndex === null) {
         await tap(p, '.topbar .icon-button'); // 🏠
         await p.waitForSelector('.mission-tile');
+        const busy = await p.evaluate(() => {
+          const n = document.querySelector('[data-mission="voetstappen"]');
+          return n.dataset.status === 'inProgress' && n.classList.contains('suggested') && !!n.querySelector('.badge-inProgress');
+        });
+        if (!busy) throw new Error('missie niet als "bezig" (▶) op de kaart na 🏠');
         await tap(p, '.mission-tile[data-mission="voetstappen"]');
         await h.waitReady(p);
         const afterHome = await h.nowIndex(p);
@@ -41,7 +46,7 @@ const { sleep, tap } = h;
       }
     });
     r.step(1, `Dubbel tikken telt één keer (klaar ${doubleTap?.before} → ${doubleTap?.after}, opdracht ${doubleTap?.idx} → ${doubleTap?.idxAfter})`, doubleTap && doubleTap.after === doubleTap.before + 1 && doubleTap.idxAfter === doubleTap.idx + 1);
-    r.step(2, `Hervatten na 🏠 (${resumeIndex?.afterHome}) en na herladen van de app (${resumeIndex?.afterReload}) bij opdracht 3`, resumeIndex && resumeIndex.afterHome === 3 && resumeIndex.afterReload === 3);
+    r.step(2, `Bezig (▶) op de kaart; hervatten na 🏠 (${resumeIndex?.afterHome}) en na herladen (${resumeIndex?.afterReload}) bij opdracht 3`, resumeIndex && resumeIndex.afterHome === 3 && resumeIndex.afterReload === 3);
 
     // --- Slepen in de appelmand ---
     await tap(page, '.result .play-button.next');

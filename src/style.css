@@ -726,3 +726,187 @@ h1 { margin: 0; font-size: clamp(28px, 4.5vmin, 44px); text-align: center; }
   .hop-button { width: 92px; height: 92px; font-size: 44px; }
   .numberline .river { padding-top: 56px; }
 }
+
+/* ---------- Fase 4: Uil Ollie (SVG) ---------- */
+
+.owl { display: block; overflow: visible; flex: none; }
+.owl .shadow { fill: rgba(0, 0, 0, 0.15); }
+.owl .body, .owl .face { fill: #8d5a3b; }
+.owl .belly { fill: #f3d9b1; }
+.owl .feathers { fill: none; stroke: #c9a27a; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.owl .wing ellipse { fill: #6d4426; }
+.owl .tuft { fill: #6d4426; }
+.owl .eye-ring { fill: #f4a300; }
+.owl .eye { fill: #fff; }
+.owl .pupil { fill: #1b2a1f; }
+.owl .glint { fill: #fff; }
+.owl .lids rect { fill: #8d5a3b; transform-box: fill-box; transform-origin: top; transform: scaleY(0); animation: blink 5s infinite; }
+.owl .beak { fill: #f4a300; }
+.owl .foot { fill: #f4a300; }
+.owl .wing, .owl .head, .owl .body-group { transform-box: fill-box; transition: transform 0.3s ease; }
+.owl .wing-l { transform-origin: 80% 15%; }
+.owl .wing-r { transform-origin: 20% 15%; }
+.owl .head { transform-origin: 50% 90%; }
+.owl .body-group { transform-origin: 50% 100%; }
+.owl.flip { transform: scaleX(-1); }
+
+.owl.pose-idle .body-group { animation: bob 3s ease-in-out infinite; }
+.owl.pose-point .wing-r { transform: rotate(-95deg); }
+.owl.pose-point .head { transform: rotate(6deg); }
+.owl.pose-point .body-group { animation: lean 1.2s ease-in-out infinite; }
+.owl.pose-happy .wing-l { transform: rotate(70deg); }
+.owl.pose-happy .wing-r { transform: rotate(-70deg); }
+.owl.pose-happy .body-group { animation: happy 0.6s ease-out 3; }
+.owl.pose-think .head { transform: rotate(-14deg); }
+.owl.pose-think .wing-r { transform: rotate(-35deg); }
+.owl.pose-wave .wing-r { animation: wave 0.5s ease-in-out 3; }
+
+.start-owl { width: clamp(110px, 18vmin, 170px); }
+.mission-owl { width: clamp(64px, 10vmin, 96px); }
+.result-owl { width: clamp(90px, 14vmin, 130px); }
+
+@keyframes blink { 0%, 94%, 100% { transform: scaleY(0); } 96% { transform: scaleY(1); } }
+@keyframes lean { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
+@keyframes wave { 0%, 100% { transform: rotate(-120deg); } 50% { transform: rotate(-70deg); } }
+
+/* ---------- Fase 4: wereldkaart ---------- */
+
+.map-screen { justify-content: flex-start; }
+.map {
+  position: relative;
+  width: min(100%, calc(100vh - 290px), 760px);
+  aspect-ratio: 1 / 1;
+  border-radius: calc(var(--radius) * 1.5);
+  background: radial-gradient(circle at 30% 70%, #b9e4a6, #8fd18f 60%, #7cc47f);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), inset 0 0 0 6px rgba(255, 255, 255, 0.6);
+  overflow: visible;
+  flex: none;
+  min-width: 300px;
+  min-height: 300px;
+}
+.map-bg { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: inherit; overflow: hidden; }
+.map-river { fill: #4fa8f0; opacity: 0.9; }
+.map-trail-edge { fill: none; stroke: #b8925e; stroke-width: 6.5; stroke-linecap: round; }
+.map-trail { fill: none; stroke: #f1d9a8; stroke-width: 4.5; stroke-linecap: round; stroke-dasharray: 0.1 5.5; }
+
+.node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: clamp(120px, 21%, 170px);
+  padding: 0;
+  border: 0;
+  background: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+}
+.node:active { transform: translate(-50%, -48%) scale(0.97); }
+.node-ring {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  padding: 9px;
+  /* Ring vult zich per voltooide ronde */
+  background: conic-gradient(var(--good) calc(var(--done) * 360deg), rgba(255, 255, 255, 0.85) 0);
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.18);
+}
+.node-icon {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #fff8e6;
+  display: grid;
+  place-items: center;
+  font-size: clamp(54px, 9vmin, 84px);
+  line-height: 1;
+}
+.node[data-mission='voetstappen'] .node-icon { background: #e5f4d9; }
+.node[data-mission='appelmand'] .node-icon { background: #ffe9c2; }
+.node[data-mission='rivier'] .node-icon { background: #d6ecff; }
+.node .stars { font-size: clamp(22px, 3.5vmin, 30px); background: rgba(255, 255, 255, 0.8); border-radius: 20px; padding: 2px 8px; }
+.node-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  font-weight: 900;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+}
+.badge-completed { background: var(--good); color: #fff; }
+.badge-inProgress { background: var(--accent); color: var(--fg); }
+.node.status-locked .node-icon { filter: grayscale(1); opacity: 0.45; }
+.node.status-locked .node-ring { background: rgba(255, 255, 255, 0.55); }
+.node.status-locked .stars { visibility: hidden; }
+.node.suggested .node-ring { animation: glow-ring 1.6s ease-in-out infinite; }
+.node .point-down { top: -64px; }
+.node.nope { animation: shake 0.4s ease-in-out; }
+.node.unlocking .node-icon { animation: unlock-pop 1s ease-out 0.4s both; }
+.node.unlocking::after {
+  content: '🔓';
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  font-size: 48px;
+  pointer-events: none;
+  animation: lock-off 1.1s ease-out forwards;
+}
+.map-owl { position: absolute; width: clamp(80px, 15%, 120px); transform: translate(-50%, -50%); z-index: 3; pointer-events: none; }
+.map-owl.flip { transform: translate(-50%, -50%) scaleX(-1); }
+
+/* Verzameling dieren onder de kaart */
+.collection {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 22px;
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.collection-group { display: flex; gap: 6px; }
+.animal {
+  width: 64px;
+  height: 64px;
+  border: 0;
+  border-radius: 50%;
+  background: #f4f4f4;
+  font-size: 40px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.animal:not(.found) { filter: brightness(0); opacity: 0.18; }
+.animal.found { background: #fff8d6; box-shadow: 0 3px 0 var(--accent-dark); }
+.animal.jump { animation: happy 0.6s ease-out; }
+
+@keyframes glow-ring { 0%, 100% { box-shadow: 0 8px 0 rgba(0, 0, 0, 0.18), 0 0 0 0 rgba(255, 211, 77, 0.95); } 50% { box-shadow: 0 8px 0 rgba(0, 0, 0, 0.18), 0 0 0 18px rgba(255, 211, 77, 0); } }
+@keyframes unlock-pop { 0% { transform: scale(0.4); filter: grayscale(1); } 70% { transform: scale(1.2); } 100% { transform: scale(1); filter: none; } }
+@keyframes lock-off { 0% { transform: translate(-50%, 0) scale(1); opacity: 1; } 100% { transform: translate(-50%, -80px) scale(1.4) rotate(20deg); opacity: 0; } }
+
+/* ---------- Fase 4: eindscherm ---------- */
+
+.reward.new { animation: reward-in 0.9s cubic-bezier(.2,.9,.3,1.3) both; }
+.stars .star.fresh { animation: star-in 0.9s cubic-bezier(.2,.9,.3,1.3) 0.6s both; }
+.unlocked { display: flex; align-items: center; gap: 10px; padding: 8px 18px; border-radius: 40px; background: #e8f5e9; font-size: 52px; animation: pop 0.5s ease-out 1.2s both; }
+.unlock-lock { animation: lock-off 1.2s ease-out 1.6s forwards; display: inline-block; }
+
+@keyframes reward-in { 0% { transform: scale(0) rotate(-30deg); opacity: 0; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+@keyframes star-in { 0% { transform: translateY(-120px) scale(2.4); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+
+/* Liggend: kaart en verzameling naast elkaar */
+@media (orientation: landscape) and (min-width: 900px) {
+  .map-screen { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto 1fr; align-items: center; justify-items: center; column-gap: 24px; }
+  .map-screen .topbar { grid-column: 1 / -1; }
+  .map-screen .map { width: min(calc(100vh - 150px), 620px); }
+  .map-screen .collection { flex-direction: column; max-width: 240px; }
+}

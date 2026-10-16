@@ -12,6 +12,7 @@ import { PointingHand } from '../interactions/hand';
 import { numberLineInteraction } from '../interactions/numberline';
 import { sequenceInteraction } from '../interactions/sequence';
 import type { Interaction, InteractionContext } from '../interactions/types';
+import { mascot as owlSvg, setPose } from '../mascot';
 import { speak, stopSpeaking } from '../speech';
 import { DEMO_TRY, DEMO_WATCH, hintText, praise, promptText, retry } from '../texts';
 import { compareLabel, visual } from '../visuals';
@@ -83,7 +84,7 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
   const home = bigButton('🏠', quit, 'icon-button');
   home.setAttribute('aria-label', 'Stoppen');
 
-  const mascot = el('span', { class: 'mascot', 'aria-hidden': 'true' }, '🦉');
+  const mascot = owlSvg('idle', 'mission-owl');
   const badge = el('span', { class: 'mode-badge', 'aria-hidden': 'true' });
   const caption = el('div', { class: 'caption', 'aria-live': 'polite' });
   const visualBox = el('div', { class: 'visual' });
@@ -292,7 +293,7 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
     );
     helpButton.disabled = mode !== 'task';
 
-    mascot.className = `mascot ${solved ? 'happy' : s.feedback === 'tryAgain' ? 'think' : ''}`;
+    setPose(mascot, solved ? 'happy' : s.feedback === 'tryAgain' ? 'think' : mode === 'demo-watch' ? 'point' : 'idle');
     badge.textContent = mode === 'demo-watch' ? '👀' : mode === 'demo-try' ? '🙋' : '';
     caption.replaceChildren(
       el('p', { class: 'prompt' }, promptText(task)),

@@ -50,6 +50,9 @@ npm run check                # lint + typecheck + tests + build, zoals CI
   Spraak is optioneel en alleen via lokale stemmen (`localService`). Nieuwe soort opdracht =
   voorbeeld in `missions/demos.ts` (voordoen → zelf proberen); acceptatietest `e2e/nonreading.cjs`
   leest nooit tekst en moet blijven slagen, net als `e2e/touch.cjs`.
+- Wereld: kaartindeling in `missions/map.ts`, regels (ontgrendelen, status, aanwijzen,
+  verzameling) puur in `state/world.ts`, tekenen in `presentation/screens/map.ts`.
+- Mascotte altijd via `mascot()`/`setPose()` (SVG), niet via emoji.
 - Nieuwe bedieningsvorm = `Interaction` (`presentation/interactions/types.ts`) met `hintTarget()`;
   slepen altijd met tik-alternatief; respecteer `reducedMotion()`.
 - Geen externe netwerkverzoeken (geen CDN, fonts, analytics).

@@ -26,7 +26,12 @@ const { sleep, tap } = h;
     await page.screenshot({ path: `${h.SP}/nr-2-select.png` });
     const sug = await page.evaluate(() => document.querySelector('.mission-tile.suggested')?.dataset.mission);
     const starsDim = await page.evaluate(() => [...document.querySelectorAll('.mission-tile .star')].every((s) => Number(getComputedStyle(s).opacity) < 0.5));
-    r.step(2, `Missiekeuze met plaatjes; eerste missie aangewezen (${sug}); lege sterren vaag`, sug === 'voetstappen' && starsDim);
+    r.step(2, `Wereldkaart met grote iconen; eerste missie aangewezen (${sug}); lege sterren vaag`, sug === 'voetstappen' && starsDim);
+    const statuses = await page.evaluate(() => [...document.querySelectorAll('.mission-tile')].map((n) => n.dataset.status).join(','));
+    await tap(page, '.mission-tile[data-mission="rivier"]');
+    await sleep(300);
+    const stayed = await page.evaluate(() => !!document.querySelector('.map') && document.querySelector('[data-mission="rivier"]').classList.contains('nope'));
+    r.step('2b', `Statussen: ${statuses}; tik op dichte missie: slotje schudt, geen missie gestart`, statuses === 'available,locked,locked' && stayed);
 
     // 3. Missie herkennen en starten
     await tap(page, '.mission-tile.suggested');
@@ -44,7 +49,7 @@ const { sleep, tap } = h;
       mistake = await p.evaluate((w) => ({
         disabled: document.querySelector(`.answers [data-value="${w}"]`).disabled,
         hint: !!document.querySelector('.item-number, .items.dots'),
-        think: !!document.querySelector('.mascot.think'),
+        think: !!document.querySelector('.mission-owl.pose-think'),
       }), wrong);
       mistake.sameTask = (await h.nowIndex(p)) === idx;
       await p.screenshot({ path: `${h.SP}/nr-6-mistake.png` });
@@ -54,13 +59,25 @@ const { sleep, tap } = h;
     r.step(6, 'Fout: knop grijs, uil kantelt, visuele hint, zelfde opdracht blijft', mistake && mistake.disabled && mistake.hint && mistake.think && mistake.sameTask);
     r.step(7, 'Volgende opdracht bereikt (voortgangsstippen)');
     await page.screenshot({ path: `${h.SP}/nr-8-result.png` });
-    r.step(8, 'Missie afgerond: beloning, sterren, grote ▶-knop', await page.evaluate(() => !!document.querySelector('.result .play-button.next')));
+    const endOk = await page.evaluate(() => ({
+      next: !!document.querySelector('.result .play-button.next'),
+      reward: !!document.querySelector('.reward.new'),
+      freshStar: !!document.querySelector('.result .star.on.fresh'),
+      unlocked: !!document.querySelector('.result .unlocked'),
+    }));
+    r.step(8, `Missie afgerond: nieuw dier, nieuwe ster, nieuwe missie open, grote ▶ (${JSON.stringify(endOk)})`, Object.values(endOk).every(Boolean));
 
     // 9. Andere missie kiezen
     await tap(page, '.result .play-button.next');
     await page.waitForSelector('.mission-tile');
     const sug2 = await page.evaluate(() => document.querySelector('.mission-tile.suggested')?.dataset.mission);
-    r.step(9, `Terug bij missiekeuze; volgende missie aangewezen (${sug2})`, sug2 === 'appelmand');
+    const world1 = await page.evaluate(() => ({
+      unlocking: document.querySelector('[data-mission="appelmand"]').classList.contains('unlocking'),
+      statuses: [...document.querySelectorAll('.mission-tile')].map((n) => n.dataset.status).join(','),
+      found: document.querySelectorAll('.collection .animal.found').length,
+    }));
+    await page.screenshot({ path: `${h.SP}/nr-9-map.png` });
+    r.step(9, `Terug op de kaart; volgende missie aangewezen (${sug2}); ontgrendel-animatie; ${world1.statuses}; ${world1.found} dier`, sug2 === 'appelmand' && world1.unlocking && world1.statuses === 'inProgress,available,locked' && world1.found === 1);
 
     await tap(page, '.mission-tile.suggested');
     const r2 = await h.playMission(page, 'nr-appelmand');
@@ -98,7 +115,12 @@ const { sleep, tap } = h;
     await tap(page, '.result .play-button.next');
     await page.waitForSelector('.mission-tile');
     const allStars = await page.evaluate(() => document.querySelectorAll('.mission-tile .star.on').length);
-    r.step(11, `Alle rondes als gouden sterren zichtbaar (${allStars}/9)`, allStars === 9);
+    const world2 = await page.evaluate(() => ({
+      statuses: [...document.querySelectorAll('.mission-tile')].map((n) => n.dataset.status).join(','),
+      found: document.querySelectorAll('.collection .animal.found').length,
+    }));
+    await page.screenshot({ path: `${h.SP}/nr-11-map-complete.png` });
+    r.step(11, `Alles voltooid: ${allStars}/9 sterren, ${world2.found}/9 dieren, ${world2.statuses}`, allStars === 9 && world2.found === 9 && world2.statuses === 'completed,completed,completed');
 
     // Bekende interactie: geen uitleg meer, wel via de hulpknop
     await tap(page, '.mission-tile[data-mission="appelmand"]');
@@ -110,7 +132,7 @@ const { sleep, tap } = h;
     r.step(12, 'Bekende interactie: geen herhaalde uitleg; ❓ speelt voorbeeld opnieuw af', noDemo && (await h.mode(page)) === 'demo-watch');
     await tap(page, '.topbar .icon-button');
     await page.waitForSelector('.mission-tile');
-    r.step(13, '🏠 stopt direct en gaat terug naar de missiekeuze');
+    r.step(13, '🏠 stopt direct en gaat terug naar de wereldkaart');
 
     const overflowX = await page.evaluate(() => document.querySelector('#ui').scrollWidth > innerWidth);
     r.step(14, `Geen horizontale scroll, geen JS-fouten (${errors.length}), geen externe verzoeken (${foreign.length})`, !overflowX && !errors.length && !foreign.length);

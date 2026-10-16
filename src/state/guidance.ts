@@ -1,5 +1,4 @@
 import type { Task } from '../missions/types';
-import type { Progress } from './progress';
 import { demoKey, type DemoKey } from './settings';
 
 /**
@@ -10,11 +9,6 @@ import { demoKey, type DemoKey } from './settings';
 export function demoNeeded(task: Task, seen: readonly DemoKey[]): DemoKey | null {
   const key = demoKey(task);
   return seen.includes(key) ? null : key;
-}
-
-/** Welke missie wijst de mascotte aan? De eerste die nog niet gespeeld is. */
-export function suggestedMission(missionIds: readonly string[], progress: Progress): string {
-  return missionIds.find((id) => !progress[id]?.completed) ?? missionIds[0];
 }
 
 /**

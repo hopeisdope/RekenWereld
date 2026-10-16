@@ -5,10 +5,14 @@ import { markDemoSeen, parseSettings, type DemoKey, type Settings } from '../sta
 import { SCHEMA_VERSION, type Storage } from '../storage/storage';
 import { missionScreen, type SoundKind } from './screens/mission';
 import { resultScreen } from './screens/result';
-import { selectScreen } from './screens/select';
+import { mapScreen } from './screens/map';
 import { startScreen } from './screens/start';
 import type { Screen } from './screens/types';
+import { setSoundEnabled } from './sound';
 import { setSpeechEnabled } from './speech';
+import { getallenbos } from '../missions/getallenbos';
+import { GETALLENBOS_MAP } from '../missions/map';
+import { newlyUnlocked, toWorld } from '../state/world';
 
 /** Schermnavigatie: start → missieselectie → missie → resultaat → missieselectie. */
 export function startApp(
@@ -23,6 +27,7 @@ export function startApp(
   let resume: ResumePoint | null = parseResume(saved?.resume);
   let current: Screen | null = null;
   setSpeechEnabled(settings.sound);
+  setSoundEnabled(settings.sound);
 
   function show(screen: Screen): void {
     current?.destroy?.();
@@ -44,12 +49,14 @@ export function startApp(
   const toggleSound = () => {
     settings = { ...settings, sound: !settings.sound };
     setSpeechEnabled(settings.sound);
+  setSoundEnabled(settings.sound);
     save();
     return settings.sound;
   };
 
-  const goStart = () => show(startScreen(settings.sound, goSelect, toggleSound));
-  const goSelect = () => show(selectScreen(progress, goMission, goStart));
+  const goStart = () => show(startScreen(settings.sound, () => goSelect(), toggleSound));
+  const order = toWorld(getallenbos.missionIds.map((id) => missions[id]));
+  const goSelect = (justUnlocked: readonly string[] = []) => show(mapScreen(progress, resume, justUnlocked, goMission, goStart));
   /** Missie openen: een onderbroken ronde gaat verder waar hij was, anders de volgende ronde. */
   const goMission = (id: string, replayRound?: number) => {
     const mission = missions[id];
@@ -67,11 +74,25 @@ export function startApp(
           save();
         },
         onFinish: (stars) => {
+          const before = progress;
           progress = recordResult(progress, id, stars, round, mission.rounds.length);
           save();
-          show(resultScreen(mission.rounds[round].reward, stars, () => goMission(id, round), goSelect));
+          const unlocked = newlyUnlocked(order, before, progress);
+          show(
+            resultScreen(
+              {
+                reward: mission.rounds[round].reward,
+                roundsDone: progress[id].roundsDone,
+                totalRounds: mission.rounds.length,
+                newRound: progress[id].roundsDone > (before[id]?.roundsDone ?? 0),
+                unlocked: unlocked.map((u) => GETALLENBOS_MAP.nodes[u].icon),
+              },
+              () => goMission(id, round),
+              () => goSelect(unlocked),
+            ),
+          );
         },
-        onQuit: goSelect,
+        onQuit: () => goSelect(),
         sound: (kind) => sound?.(kind),
       }, resumeHere),
     );
