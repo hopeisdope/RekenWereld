@@ -35,7 +35,8 @@ dus offline-gedrag test je op de Pages-URL of met de productiepreview op de Mac 
 ```bash
 npm run typecheck   # TypeScript
 npm test            # unit-tests (Vitest)
-npm run check       # typecheck + tests + build, zoals CI
+npm run lint        # ESLint
+npm run check       # lint + typecheck + tests + build, zoals CI
 ```
 
 ### Browsertests (Playwright)
@@ -45,6 +46,8 @@ npm run check       # typecheck + tests + build, zoals CI
   Antwoorden komen alleen uit de plaatjes, getallen en sommen of uit de wijzende hand.
 - `e2e/touch.cjs` — echt slepen, verkeerd loslaten, dubbel tikken, draaien van de iPad,
   hervatten na 🏠 en na herladen, en "Beperk beweging" (liggend).
+- `e2e/progress.cjs` — heropenen na afsluiten, makkelijker na herhaalde fouten, ouderpoort,
+  niveau aanpassen, reset met bevestiging, volle/kapotte opslag en oude opslag (schema 1).
 
 Vereist Playwright met Chromium.
 
@@ -52,6 +55,7 @@ Vereist Playwright met Chromium.
 npm run preview:pages        # terminal 1
 node e2e/nonreading.cjs      # terminal 2; screenshots in e2e/output/
 node e2e/touch.cjs
+node e2e/progress.cjs
 ```
 
 ## Bouwen
@@ -87,6 +91,13 @@ Verwachte publicatie-URL (pas geldig na de eerste geslaagde deploy):
 
 Een mislukte build of deploy is zichtbaar als rode run in het tabblad **Actions**, als rode
 status bij de commit/PR, en GitHub stuurt standaard een e-mail naar wie de run startte.
+
+## Voor ouders
+
+Op het startscherm zit linksboven een klein 👪-knopje. Houd de knop 2 seconden ingedrukt en
+beantwoord de keersom. Daar zie je per vaardigheid hoe het gaat, kun je het niveau per
+vaardigheid op makkelijker/automatisch/moeilijker zetten en de voortgang (bevestigd) wissen.
+Alles staat alleen op het apparaat; er is geen account of server.
 
 ## Installeren op iPad
 

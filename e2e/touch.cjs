@@ -124,6 +124,7 @@ const { sleep, tap } = h;
     r.step(9, `Geen JS-fouten (${errors.length})`, errors.length === 0);
   } catch (e) {
     r.step('!', `Afgebroken: ${e.message.split('\n')[0]}`, false);
+    if (process.env.DEBUG) console.log(e.stack);
     await page.screenshot({ path: `${h.SP}/touch-error.png` });
   } finally {
     await browser.close();

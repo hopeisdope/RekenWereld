@@ -49,12 +49,15 @@ npm run check                # lint + typecheck + tests + build, zoals CI
   beweging of de wijzende hand (👆/👉/👇). Tekst (`.caption`, titels) is alleen ondersteuning.
   Spraak is optioneel en alleen via lokale stemmen (`localService`). Nieuwe soort opdracht =
   voorbeeld in `missions/demos.ts` (voordoen → zelf proberen); acceptatietest `e2e/nonreading.cjs`
-  leest nooit tekst en moet blijven slagen, net als `e2e/touch.cjs`.
+  leest nooit tekst en moet blijven slagen, net als `e2e/touch.cjs` en `e2e/progress.cjs`.
 - Wereld: kaartindeling in `missions/map.ts`, regels (ontgrendelen, status, aanwijzen,
   verzameling) puur in `state/world.ts`, tekenen in `presentation/screens/map.ts`.
 - Mascotte altijd via `mascot()`/`setPose()` (SVG), niet via emoji.
 - Nieuwe bedieningsvorm = `Interaction` (`presentation/interactions/types.ts`) met `hintTarget()`;
   slepen altijd met tik-alternatief; respecteer `reducedMotion()`.
+- Adaptiviteit: alle drempels in `ADAPTIVE_RULES` (`state/mastery.ts`); regels puur en
+  deterministisch, nooit niveau of "beheerst" op basis van één antwoord. Ouderinstelling gaat voor.
+- Oudergedeelte (`screens/parent.ts`) mag gewone tekst gebruiken; het kind heeft het nooit nodig.
 - Geen externe netwerkverzoeken (geen CDN, fonts, analytics).
 - Publieke repo: geen persoonsgegevens van het kind in code, commits of issues.
 - Opslagschema wijzigen = `SCHEMA_VERSION` ophogen en migratie toevoegen in `src/storage/`.

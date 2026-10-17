@@ -31,6 +31,8 @@ export interface Task {
   choices?: readonly number[];
   /** Bereik van de getallenlijn (bij 'numberline'). */
   line?: { min: number; max: number };
+  /** De geplande opdracht waaruit deze is gemaakt (om bij aanpassing opnieuw te maken). */
+  spec?: TaskSpec;
 }
 
 /** Eén geplande opdracht in een ronde. */

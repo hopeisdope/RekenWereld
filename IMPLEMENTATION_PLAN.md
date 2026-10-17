@@ -1,6 +1,6 @@
 # IMPLEMENTATION_PLAN — RekenWereld
 
-Status: **Fase 4 afgerond** (avonturenwereld en missieprogressie). Laatst bijgewerkt: 2026-10-16.
+Status: **Fase 5 afgerond** (voortgang, eenvoudige adaptiviteit, oudergedeelte). Laatst bijgewerkt: 2026-10-16.
 
 ## 1. Uitgangssituatie (fase 0-inventarisatie)
 
@@ -248,7 +248,21 @@ Nog niet geverifieerd: echte deploy op Pages, gedrag op een fysieke iPad.
      de nieuw geopende missie; één grote ▶ terug naar de kaart.
    - Geluidjes via Web Audio (geen bestanden, geen netwerk), aan/uit met de geluidsknop.: slepen (Pointer Events), aftrekken in eigen missie,
    Playwright-rooktest (iPad-viewport, touch) in CI.
-8. **Later – wereld uitbreiden**: canvas-wereldkaart met gebieden, ontgrendelen, animaties, audio.
+8. **Fase 5** ✅ voortgang en eenvoudige adaptiviteit
+   - Per vaardigheid (`state/mastery.ts`): pogingen, foutloze opdrachten, laatste 8 uitkomsten
+     (foutloos / één fout / moeilijk = ≥ 2 fouten) en een niveau-aanpassing.
+   - Regels (`ADAPTIVE_RULES`, deterministisch): 5 op rij foutloos → één niveau moeilijker (max +1);
+     2 op rij moeilijk → één niveau makkelijker (min −2) met voorwerpen erbij; de nog komende
+     opdrachten van die vaardigheid in de ronde worden direct opnieuw gemaakt. "Beheerst" = ≥ 6
+     recente opdrachten en ≥ 80% foutloos; "extra oefenen nuttig" = makkelijker gemaakt of < 50%
+     foutloos bij ≥ 4 opdrachten → één extra concrete opdracht per ronde (max 8 per ronde).
+     Eén antwoord verandert nooit niveau of status.
+   - Oudergedeelte: 👪 klein op het startscherm → 2 s ingedrukt houden → keersom. Overzicht per
+     vaardigheid (status, % foutloos, niveau), missies en dieren, niveau per vaardigheid
+     (Makkelijker / Automatisch / Moeilijker), geluid, opslag/privacy, reset in twee stappen.
+   - Opslag schema 2 met migratie vanaf schema 1, reservekopie van de vorige goede stand,
+     kapotte data apart bewaard, status "opslaan lukt niet" zichtbaar voor ouders.
+9. **Later – wereld uitbreiden**: canvas-wereldkaart met gebieden, ontgrendelen, animaties, audio.
 7. **Fase 4 – afronding MVP**: ouder-menu, persist-verzoek, testen op iPad en iPad mini, offline-test.
 8. **Later**: splitsen, patronen, vormen, meten, dagelijks leven; export/import van voortgang.
 

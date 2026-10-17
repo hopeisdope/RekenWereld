@@ -8,7 +8,7 @@ import type { Screen } from './types';
  * Startscherm met één duidelijke actie: de grote speelknop. De mascotte wijst
  * ernaar. Het geluidsknopje is klein en zit in de hoek (voor ouders).
  */
-export function startScreen(sound: boolean, onPlay: () => void, onToggleSound: () => boolean): Screen {
+export function startScreen(sound: boolean, onPlay: () => void, onToggleSound: () => boolean, onParents?: () => void): Screen {
   const soundButton = bigButton(sound ? '🔊' : '🔇', () => {
     const on = onToggleSound();
     soundButton.textContent = on ? '🔊' : '🔇';
@@ -18,6 +18,10 @@ export function startScreen(sound: boolean, onPlay: () => void, onToggleSound: (
   soundButton.setAttribute('aria-label', 'Geluid');
   soundButton.setAttribute('aria-pressed', String(sound));
 
+  // Toegang voor ouders: klein, in de andere hoek, achter een poort (zie parentGate).
+  const parents = onParents ? bigButton('👪', onParents, 'icon-button small-corner left parent-entry') : null;
+  parents?.setAttribute('aria-label', 'Voor ouders');
+
   const play = bigButton(el('span', { class: 'play-triangle', 'aria-hidden': 'true' }), onPlay, 'play-button');
   play.setAttribute('aria-label', 'Spelen');
 
@@ -26,6 +30,7 @@ export function startScreen(sound: boolean, onPlay: () => void, onToggleSound: (
       'main',
       { class: 'screen start' },
       soundButton,
+      parents,
       el('h1', { class: 'title' }, 'RekenWereld'),
       el(
         'div',

@@ -1,9 +1,10 @@
-import { buildRoundTasks } from '../../missions/build';
+import { buildRoundTasks, rebuildUpcoming, type Adaptation } from '../../missions/build';
+import type { SkillId } from '../../math/skills';
 import { demoTask } from '../../missions/demos';
 import type { Mission, Task } from '../../missions/types';
 import { demoNeeded, shouldPointAtAnswer } from '../../state/guidance';
 import { snapshot, type ResumePoint } from '../../state/resume';
-import { currentTask, reduce, startSession, starsFor, type SessionState } from '../../state/session';
+import { currentTask, reduce, replaceUpcoming, startSession, starsFor, type SessionState } from '../../state/session';
 import type { DemoKey } from '../../state/settings';
 import { bigButton, el } from '../dom';
 import { choiceInteraction } from '../interactions/choices';
@@ -38,6 +39,11 @@ export interface MissionCallbacks {
   onFinish(stars: 1 | 2 | 3): void;
   onQuit(): void;
   sound?(kind: SoundKind): void;
+  /**
+   * Een opdracht is goed afgerond (met zoveel fouten). Geeft de nieuwe
+   * niveau-aanpassing terug als die daardoor veranderde, anders null.
+   */
+  onTaskDone?(task: Task, mistakes: number): { skill: SkillId; shift: number } | null;
 }
 
 /**
@@ -48,10 +54,10 @@ export interface MissionCallbacks {
  */
 type Mode = 'task' | 'demo-watch' | 'demo-try';
 
-export function missionScreen(mission: Mission, round: number, rng: () => number, cb: MissionCallbacks, resume?: ResumePoint): Screen {
+export function missionScreen(mission: Mission, round: number, rng: () => number, cb: MissionCallbacks, resume?: ResumePoint, adapt?: Adaptation): Screen {
   let session: SessionState = resume
     ? startSession(mission.id, resume.tasks, resume.index, resume.firstTry)
-    : startSession(mission.id, buildRoundTasks(mission, round, rng));
+    : startSession(mission.id, buildRoundTasks(mission, round, rng, adapt));
   let practice: SessionState | null = null;
   let mode: Mode = 'task';
   let readyAt = 0;
@@ -236,6 +242,9 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
       return;
     }
     if (mode === 'demo-watch') return; // demoTap gaat verder
+    // Voortgang per vaardigheid; bij een niveauwijziging de komende opdrachten aanpassen.
+    const change = cb.onTaskDone?.(currentTask(session), session.mistakes);
+    if (change) session = replaceUpcoming(session, rebuildUpcoming(session.tasks, session.index + 1, change.skill, mission, rng, change.shift));
     cb.onProgress(snapshot(session, round));
     later(CELEBRATE_MS, () => {
       session = reduce(session, { type: 'next' });

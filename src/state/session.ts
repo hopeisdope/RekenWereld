@@ -78,3 +78,13 @@ export function starsFor(s: Pick<SessionState, 'firstTry' | 'tasks'>): 1 | 2 | 3
   if (s.firstTry * 2 >= s.tasks.length) return 2;
   return 1;
 }
+
+/**
+ * Vervang de nog komende opdrachten (bv. makkelijker gemaakt na herhaalde
+ * fouten). De huidige en eerdere opdrachten blijven precies zoals ze waren.
+ */
+export function replaceUpcoming(s: SessionState, tasks: readonly Task[]): SessionState {
+  if (tasks.length !== s.tasks.length) return s;
+  const merged = s.tasks.map((t, i) => (i <= s.index ? t : tasks[i]));
+  return { ...s, tasks: merged };
+}

@@ -27,6 +27,7 @@ function reporter() {
 async function visualAnswer(page) {
   return page.evaluate(() => {
     const v = document.querySelector('.visual');
+    if (!v) return null; // (nog) geen opdracht in beeld
     const num = (el) => Number(el.textContent.trim());
     const eq = v.querySelector('.equation')?.textContent.replace(/\s/g, '');
     if (v.querySelector('.count-scene')) return [v.querySelectorAll('.count-scene .item').length];
@@ -116,7 +117,8 @@ async function solveCurrent(page) {
   if (kind === 'numberline') await hopTo(page, values[0]);
   else if (kind === 'drag') await placeItems(page, values[0]);
   else for (const v of values) { await tapValue(page, v); await sleep(120); }
-  await sleep(120);
+  // Wacht op de toestand i.p.v. een vaste tijd (onder belasting kan een tik later aankomen).
+  await page.waitForFunction(() => document.querySelector('.mission-card-body.solved') || document.querySelector('.result'), null, { timeout: 3000 }).catch(() => {});
   return values;
 }
 
@@ -168,8 +170,9 @@ async function playMission(page, tag, onTask) {
     const idx = await nowIndex(page);
     if (onTask) await onTask(page, idx);
     if (await solvedNow(page)) continue;
+    if (!(await visualAnswer(page))) continue; // scherm wisselde net; opnieuw kijken
     const values = await solveCurrent(page);
-    if (!(await solvedNow(page))) throw new Error(`antwoord ${values} niet goed in ${tag} opdracht ${idx}`);
+    if (!(await solvedNow(page)) && !(await page.locator('.result').count())) throw new Error(`antwoord ${values} niet goed in ${tag} opdracht ${idx}`);
     kinds.add(await page.evaluate(() => document.querySelector('.mission-card-body').className.match(/prompt-(\S+)/)[1]));
   }
   return { demos, kinds: [...kinds] };

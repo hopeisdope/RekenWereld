@@ -10,8 +10,8 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 
 ## Volgende
 
-- [ ] `e2e/nonreading.cjs` en `e2e/touch.cjs` in CI draaien (Playwright als devDependency)
-- [ ] Ouder-menu (verborgen): voortgang wissen, niveau per vaardigheid instellen, `navigator.storage.persist()`
+- [ ] `e2e/*.cjs` in CI draaien (Playwright als devDependency)
+- [ ] `navigator.storage.persist()` aanvragen (minder kans dat Safari gegevens wist)
 - [ ] Export/import van voortgang (Safari wist opslag na 7 dagen niet gebruiken, behalve op beginscherm)
 - [ ] Hervatten bewaart nu één onderbroken ronde; bij starten van een andere missie vervalt die
 - [ ] Definitieve illustraties (missie-iconen, dieren) als eigen SVG i.p.v. emoji
@@ -19,12 +19,16 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 
 ## Open vragen
 
+- Kloppen de drempels in `ADAPTIVE_RULES` (5 op rij → moeilijker, 2 op rij moeilijk → makkelijker) bij echt gebruik?
+
 - Getal zoeken is 'hetzelfde getal vinden'; hoor-naar-symbool alleen met spraak. Voldoende?
 - Vergelijken vraagt alleen "meer"; "minder" vraagt een symbool dat zonder lezen werkt. Nodig?
 - 🏠 stopt direct zonder bevestiging (voortgang wordt bewaard): per ongeluk tikken een probleem?
 - Minimale iPadOS-versie van de doel-iPads? (nu uitgegaan van 15+)
 
 ## Klaar
+
+- [x] Fase 5: voortgang per vaardigheid, adaptieve regels, oudergedeelte, opslag v2 met herstel (2026-10-17)
 
 - [x] Fase 4: wereldkaart, SVG-mascotte, statussen, ontgrendelen, verzameling, eindscherm, geluid (2026-10-16)
 - [x] Fase 3: touch-interacties (knoppen, slepen/tikken, getallenlijn met stappen), hervatten (2026-10-16)

@@ -1,4 +1,6 @@
+import type { SkillId } from '../math/skills';
 import type { InteractionKind, PromptKind, Task } from '../missions/types';
+import { parseOverrides, type LevelOverride } from './mastery';
 
 /**
  * Sleutel van een voorbeeld: soort opdracht + bediening, bv. "makeTen/drag".
@@ -18,9 +20,11 @@ export interface Settings {
   sound: boolean;
   /** Voorbeelden die al zijn voorgedaan en geoefend. */
   seenDemos: readonly DemoKey[];
+  /** Niveau per vaardigheid, ingesteld door een ouder (ontbreekt = automatisch). */
+  levelOverrides: Readonly<Partial<Record<SkillId, LevelOverride>>>;
 }
 
-export const DEFAULT_SETTINGS: Settings = { sound: true, seenDemos: [] };
+export const DEFAULT_SETTINGS: Settings = { sound: true, seenDemos: [], levelOverrides: {} };
 
 const PROMPTS = ['count', 'recognize', 'build', 'compare', 'order', 'missing', 'add', 'subtract', 'split', 'makeTen', 'jump'];
 const INTERACTIONS = ['choice', 'numberline', 'sequence', 'drag'];
@@ -52,14 +56,22 @@ function toKey(v: unknown): DemoKey | null {
 
 export function parseSettings(raw: unknown): Settings {
   if (!raw || typeof raw !== 'object') return DEFAULT_SETTINGS;
-  const { sound, seenDemos } = raw as Record<string, unknown>;
+  const { sound, seenDemos, levelOverrides } = raw as Record<string, unknown>;
   const keys = Array.isArray(seenDemos) ? seenDemos.map(toKey).filter((k): k is DemoKey => k !== null) : [];
   return {
     sound: typeof sound === 'boolean' ? sound : DEFAULT_SETTINGS.sound,
     seenDemos: [...new Set(keys)],
+    levelOverrides: parseOverrides(levelOverrides),
   };
 }
 
 export function markDemoSeen(s: Settings, key: DemoKey): Settings {
   return s.seenDemos.includes(key) ? s : { ...s, seenDemos: [...s.seenDemos, key] };
+}
+
+export function setLevelOverride(s: Settings, skill: SkillId, value: LevelOverride): Settings {
+  const levelOverrides = { ...s.levelOverrides };
+  if (value === 'auto') delete levelOverrides[skill];
+  else levelOverrides[skill] = value;
+  return { ...s, levelOverrides };
 }
