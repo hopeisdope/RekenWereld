@@ -16,6 +16,9 @@ Beknopte stand voor een nieuwe sessie. Details staan in `WORKLIST.md` en `IMPLEM
 - Na feedback van de eerste test: pootjes zijn nu één eigen afdruk (SVG); opeenvolgende opdrachten
   en voorbeelden hebben nooit hetzelfde getal na elkaar.
 
+- Voorlezen: app kiest de beste lokale NL-stem (verbeterd/premium eerst), tempo 1,0, korte pauze
+  na afbreken; ouders kunnen stem en tempo kiezen (Voorlezen in het oudergedeelte). Niet zelf gehoord.
+
 ## Nog te observeren met het kind
 - Begrijpt het de kaart: slotje = nog dicht, ring/▶ = bezig, vinkje = klaar? Volgt het de uil?
 - Herkent het de drie iconen (pootjes, mand, kikker) zonder uitleg?

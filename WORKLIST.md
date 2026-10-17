@@ -15,7 +15,7 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 - [ ] Export/import van voortgang (Safari wist opslag na 7 dagen niet gebruiken, behalve op beginscherm)
 - [ ] Hervatten bewaart nu één onderbroken ronde; bij starten van een andere missie vervalt die
 - [ ] Definitieve illustraties (missie-iconen, dieren) als eigen SVG i.p.v. emoji
-- [ ] Opgenomen stem voor instructies (Web Speech-stemmen verschillen per iPad)
+- [ ] Opgenomen stem voor instructies (bv. eigen opnames van een ouder) als de iPad-stemmen niet goed genoeg klinken
 
 ## Open vragen
 
@@ -27,6 +27,8 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 - Minimale iPadOS-versie van de doel-iPads? (nu uitgegaan van 15+)
 
 ## Klaar
+
+- [x] Voorlezen: beste lokale stem automatisch, tempo 1,0, pauze na afbreken; stem + tempo kiezen in oudergedeelte (2026-10-17)
 
 - [x] Feedback test: één pootafdruk i.p.v. 🐾 (dubbel tellen); geen hetzelfde getal na elkaar (2026-10-17)
 

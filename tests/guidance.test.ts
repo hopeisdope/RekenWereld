@@ -62,8 +62,8 @@ describe('instellingen', () => {
 
   it('leest kapotte of oude opslag veilig in', () => {
     expect(parseSettings(undefined)).toEqual(DEFAULT_SETTINGS);
-    expect(parseSettings({ sound: 'ja', seenDemos: ['add/choice', 'onzin', 3, 'add/vliegen'] })).toEqual({ sound: true, seenDemos: ['add/choice'], levelOverrides: {} });
-    expect(parseSettings({ sound: false, seenDemos: 'add' })).toEqual({ sound: false, seenDemos: [], levelOverrides: {} });
+    expect(parseSettings({ sound: 'ja', seenDemos: ['add/choice', 'onzin', 3, 'add/vliegen'] })).toEqual({ sound: true, seenDemos: ['add/choice'], levelOverrides: {}, voiceURI: null, speechRate: 'normal' });
+    expect(parseSettings({ sound: false, seenDemos: 'add' })).toEqual({ sound: false, seenDemos: [], levelOverrides: {}, voiceURI: null, speechRate: 'normal' });
   });
 
   it('markDemoSeen voegt niet dubbel toe', () => {

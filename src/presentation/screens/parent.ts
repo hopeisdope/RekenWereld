@@ -5,9 +5,18 @@ import type { StorageStatus } from '../../storage/storage';
 import { el } from '../dom';
 import type { Screen } from './types';
 
+export interface VoiceChoice {
+  /** Beschikbare lokale Nederlandse stemmen, beste eerst. */
+  voices: readonly { voiceURI: string; name: string; lang: string }[];
+  selected: string | null;
+  rate: 'normal' | 'slow';
+}
+
 export interface ParentActions {
   setOverride(skill: SkillRow['skill'], value: LevelOverride): void;
   toggleSound(): boolean;
+  setVoice(voiceURI: string | null, rate: 'normal' | 'slow'): void;
+  testVoice(): void;
   reset(): void;
   close(): void;
 }
@@ -25,7 +34,7 @@ const SHIFT_TEXT = (shift: number) => (shift < 0 ? 'makkelijker dan de leerlijn'
  * Oudergedeelte: eenvoudig overzicht, niveau per vaardigheid, geluid en een
  * bevestigde reset. Alles staat alleen op dit apparaat.
  */
-export function parentScreen(report: ParentReport, storage: StorageStatus, sound: boolean, actions: ParentActions): Screen {
+export function parentScreen(report: ParentReport, storage: StorageStatus, sound: boolean, voice: VoiceChoice, actions: ParentActions): Screen {
   const close = el('button', { type: 'button', class: 'parent-close', 'aria-label': 'Terug naar het spel' }, '✕ Terug');
   close.addEventListener('click', actions.close);
 
@@ -63,6 +72,55 @@ export function parentScreen(report: ParentReport, storage: StorageStatus, sound
     soundBtn.textContent = on ? 'Geluid en voorlezen: aan' : 'Geluid en voorlezen: uit';
     soundBtn.setAttribute('aria-pressed', String(on));
   });
+
+  // Voorlezen: stem en tempo kiezen, met een testknop.
+  let selected = voice.selected;
+  let rate = voice.rate;
+  const voiceSelect = el('select', { class: 'voice-select', 'aria-label': 'Stem' });
+  voiceSelect.append(el('option', { value: '' }, 'Automatisch (beste stem)'));
+  for (const v of voice.voices) {
+    const opt = el('option', { value: v.voiceURI }, `${v.name} (${v.lang.replace('_', '-')})`);
+    if (v.voiceURI === selected) opt.selected = true;
+    voiceSelect.append(opt);
+  }
+  voiceSelect.addEventListener('change', () => {
+    selected = voiceSelect.value || null;
+    actions.setVoice(selected, rate);
+    actions.testVoice();
+  });
+  const rateSeg = el('div', { class: 'segmented', role: 'radiogroup', 'aria-label': 'Tempo' });
+  for (const [value, text] of [['normal', 'Normaal'], ['slow', 'Rustig']] as const) {
+    const b = el('button', { type: 'button', role: 'radio', 'aria-checked': String(rate === value), class: rate === value ? 'on' : '', 'data-rate': value }, text);
+    b.addEventListener('click', () => {
+      rate = value;
+      for (const x of rateSeg.querySelectorAll('button')) {
+        const on = x.dataset.rate === value;
+        x.classList.toggle('on', on);
+        x.setAttribute('aria-checked', String(on));
+      }
+      actions.setVoice(selected, rate);
+      actions.testVoice();
+    });
+    rateSeg.append(b);
+  }
+  const testBtn = el('button', { type: 'button', class: 'parent-button test-voice' }, '▶ Laat horen');
+  testBtn.addEventListener('click', actions.testVoice);
+  const voiceSection = voice.voices.length
+    ? [
+        el('div', { class: 'voice-row' }, voiceSelect, rateSeg, testBtn),
+        el(
+          'p',
+          { class: 'hint-small' },
+          'Klinkt de stem robotachtig? Download op de iPad een betere stem: Instellingen → Toegankelijkheid → Gesproken materiaal → Stemmen → Nederlands → kies een stem met "Verbeterd" of "Premium" en tik op downloaden. Open daarna de app opnieuw en kies die stem hier. Stemmen werken op het apparaat zelf, zonder internet.',
+        ),
+      ]
+    : [
+        el(
+          'p',
+          { class: 'warning no-voices' },
+          'Er is op dit apparaat geen Nederlandse stem gevonden, dus de app leest niet voor (spelen kan gewoon). Op de iPad: Instellingen → Toegankelijkheid → Gesproken materiaal → Stemmen → Nederlands → download een stem en open de app opnieuw.',
+        ),
+      ];
 
   // Reset in twee stappen: eerst vragen, dan pas wissen.
   const resetBox = el('div', { class: 'reset-box' });
@@ -115,6 +173,7 @@ export function parentScreen(report: ParentReport, storage: StorageStatus, sound
           el('ul', { class: 'skill-list' }, ...rows),
         ),
         el('section', {}, el('h2', {}, 'Instellingen'), soundBtn),
+        el('section', { class: 'voice-section' }, el('h2', {}, 'Voorlezen'), ...voiceSection),
         el('section', {}, el('h2', {}, 'Opslag en privacy'), ...storageNotes.filter(Boolean)),
         el('section', {}, el('h2', {}, 'Opnieuw beginnen'), resetBox),
       ),

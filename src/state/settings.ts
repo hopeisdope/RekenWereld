@@ -22,9 +22,13 @@ export interface Settings {
   seenDemos: readonly DemoKey[];
   /** Niveau per vaardigheid, ingesteld door een ouder (ontbreekt = automatisch). */
   levelOverrides: Readonly<Partial<Record<SkillId, LevelOverride>>>;
+  /** Gekozen voorleesstem (voiceURI); null = automatisch de beste lokale stem. */
+  voiceURI: string | null;
+  /** Voorleestempo. */
+  speechRate: 'normal' | 'slow';
 }
 
-export const DEFAULT_SETTINGS: Settings = { sound: true, seenDemos: [], levelOverrides: {} };
+export const DEFAULT_SETTINGS: Settings = { sound: true, seenDemos: [], levelOverrides: {}, voiceURI: null, speechRate: 'normal' };
 
 const PROMPTS = ['count', 'recognize', 'build', 'compare', 'order', 'missing', 'add', 'subtract', 'split', 'makeTen', 'jump'];
 const INTERACTIONS = ['choice', 'numberline', 'sequence', 'drag'];
@@ -56,12 +60,14 @@ function toKey(v: unknown): DemoKey | null {
 
 export function parseSettings(raw: unknown): Settings {
   if (!raw || typeof raw !== 'object') return DEFAULT_SETTINGS;
-  const { sound, seenDemos, levelOverrides } = raw as Record<string, unknown>;
+  const { sound, seenDemos, levelOverrides, voiceURI, speechRate } = raw as Record<string, unknown>;
   const keys = Array.isArray(seenDemos) ? seenDemos.map(toKey).filter((k): k is DemoKey => k !== null) : [];
   return {
     sound: typeof sound === 'boolean' ? sound : DEFAULT_SETTINGS.sound,
     seenDemos: [...new Set(keys)],
     levelOverrides: parseOverrides(levelOverrides),
+    voiceURI: typeof voiceURI === 'string' && voiceURI.length > 0 && voiceURI.length < 300 ? voiceURI : null,
+    speechRate: speechRate === 'slow' ? 'slow' : 'normal',
   };
 }
 

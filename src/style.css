@@ -963,3 +963,7 @@ h1 { margin: 0; font-size: clamp(28px, 4.5vmin, 44px); text-align: center; }
 .tile-paw .paw-svg { width: 22px; height: 22px; opacity: 0.7; }
 .node-icon .paw-svg { width: 0.9em; height: 0.9em; }
 .unlock-icon .paw-svg { width: 1em; height: 1em; }
+
+/* Oudergedeelte: voorlezen */
+.voice-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.voice-select { min-height: 48px; max-width: 100%; padding: 0 12px; border: 1px solid #bdbdbd; border-radius: 12px; background: #fff; font-size: 17px; }

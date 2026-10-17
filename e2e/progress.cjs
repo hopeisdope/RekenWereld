@@ -89,6 +89,8 @@ function mistakesOn(prompt, log) {
     r.step(4, `Oudergedeelte toont oefening per vaardigheid: tellen "${count.text}" [${count.status}], herkennen [${recognize.status}]`, count.text.includes('3 opdrachten') && count.text.includes('makkelijker') && count.status === 'needsPractice' && recognize.status !== 'notStarted');
     const advice = await page2.locator('.advice').textContent();
     r.step('4b', `Advies voor ouders: "${advice.slice(0, 60)}…"`, advice.includes('hoeveelheden tellen'));
+    const voice = await page2.evaluate(() => ({ select: !!document.querySelector('.voice-section .voice-select'), none: !!document.querySelector('.voice-section .no-voices') }));
+    r.step('4c', `Voorlezen-instelling aanwezig (${voice.select ? 'stemkeuze' : 'melding: geen Nederlandse stem op dit apparaat'})`, voice.select || voice.none);
 
     // Niveau aanpassen: getallen herkennen "Makkelijker" → in ronde 2 (normaal 11–20) alleen 0–10.
     await tap(page2, '.skill-row[data-skill="recognize"] [data-value="easier"]');

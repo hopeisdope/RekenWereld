@@ -17,7 +17,7 @@ import { resultScreen } from './screens/result';
 import { startScreen } from './screens/start';
 import type { Screen } from './screens/types';
 import { setSoundEnabled } from './sound';
-import { setSpeechEnabled } from './speech';
+import { dutchVoices, setSpeechEnabled, setVoicePreference, speak } from './speech';
 
 /** Schermnavigatie: start → kaart → missie → eindscherm → kaart; ouders via de start. */
 export function startApp(
@@ -39,6 +39,7 @@ export function startApp(
   const applySound = () => {
     setSpeechEnabled(settings.sound);
     setSoundEnabled(settings.sound);
+    setVoicePreference(settings.voiceURI, settings.speechRate);
   };
   applySound();
 
@@ -53,7 +54,13 @@ export function startApp(
     storage.save({
       schemaVersion: SCHEMA_VERSION,
       progress: { ...progress },
-      settings: { sound: settings.sound, seenDemos: [...settings.seenDemos], levelOverrides: { ...settings.levelOverrides } },
+      settings: {
+        sound: settings.sound,
+        seenDemos: [...settings.seenDemos],
+        levelOverrides: { ...settings.levelOverrides },
+        voiceURI: settings.voiceURI,
+        speechRate: settings.speechRate,
+      },
       resume: resume ?? undefined,
       skills: { ...stats },
       updatedAt: new Date().toISOString(),
@@ -79,19 +86,25 @@ export function startApp(
   const goParents = () => {
     const report = parentReport(stats, settings.levelOverrides, progress, allMissions);
     show(
-      parentScreen(report, storage.status(), settings.sound, {
+      parentScreen(report, storage.status(), settings.sound, { voices: dutchVoices(), selected: settings.voiceURI, rate: settings.speechRate }, {
         setOverride: (skill: SkillId, value) => {
           settings = setLevelOverride(settings, skill, value);
           save();
           goParents();
         },
         toggleSound,
+        setVoice: (voiceURI, speechRate) => {
+          settings = { ...settings, voiceURI, speechRate };
+          applySound();
+          save();
+        },
+        testVoice: () => speak('Hoi! Ik ben Uil Ollie. Hoeveel appels zijn het samen? Goed zo!'),
         reset: () => {
           // Alles wissen behalve de geluidsinstelling.
           progress = {};
           stats = {};
           resume = null;
-          settings = { ...DEFAULT_SETTINGS, sound: settings.sound };
+          settings = { ...DEFAULT_SETTINGS, sound: settings.sound, voiceURI: settings.voiceURI, speechRate: settings.speechRate };
           storage.clear();
           save();
           goStart();
