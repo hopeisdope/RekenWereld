@@ -53,6 +53,10 @@ npm run check                # lint + typecheck + tests + build, zoals CI
 - Wereld: kaartindeling in `missions/map.ts`, regels (ontgrendelen, status, aanwijzen,
   verzameling) puur in `state/world.ts`, tekenen in `presentation/screens/map.ts`.
 - Mascotte altijd via `mascot()`/`setPose()` (SVG), niet via emoji.
+- Telbare voorwerpen moeten één ding per plaatje zijn: geen 🐾/👣 (twee afdrukken = dubbel tellen);
+  voor pootjes `PAW`/`pawSvg()` uit `presentation/visuals.ts`.
+- Nooit twee opdrachten na elkaar met hetzelfde getal (antwoord), ook niet voorbeeld → zelf
+  proberen → eerste opdracht; geregeld in `missions/build.ts` en `missions/demos.ts`.
 - Nieuwe bedieningsvorm = `Interaction` (`presentation/interactions/types.ts`) met `hintTarget()`;
   slepen altijd met tik-alternatief; respecteer `reducedMotion()`.
 - Adaptiviteit: alle drempels in `ADAPTIVE_RULES` (`state/mastery.ts`); regels puur en

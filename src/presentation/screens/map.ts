@@ -8,6 +8,7 @@ import { mascot, setPose } from '../mascot';
 import { playSound } from '../sound';
 import { speak } from '../speech';
 import { PICK_MISSION } from '../texts';
+import { thing } from '../visuals';
 import { starRow } from '../widgets';
 import type { Screen } from './types';
 
@@ -43,7 +44,7 @@ export function mapScreen(
     const ring = el(
       'span',
       { class: 'node-ring', style: `--done:${roundsDone / m.rounds.length}` },
-      el('span', { class: 'node-icon', 'aria-hidden': 'true' }, node.icon),
+      el('span', { class: 'node-icon', 'aria-hidden': 'true' }, thing(node.icon)),
     );
     const button = el(
       'button',

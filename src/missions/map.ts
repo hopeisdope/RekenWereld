@@ -21,7 +21,7 @@ export interface AreaMap {
 
 export const GETALLENBOS_MAP: AreaMap = {
   nodes: {
-    voetstappen: { x: 24, y: 76, icon: '🐾' },
+    voetstappen: { x: 24, y: 76, icon: 'paw' }, // eigen pootafdruk (🐾 toont er twee)
     appelmand: { x: 72, y: 56, icon: '🧺' },
     rivier: { x: 32, y: 28, icon: '🐸' },
   },

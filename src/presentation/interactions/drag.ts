@@ -1,7 +1,7 @@
 import { freeSlots, place, placementFor, takeBack, type Placement } from '../../state/placement';
 import { el } from '../dom';
 import { flyFrom, reducedMotion } from '../motion';
-import { THEME_EMOJI } from '../visuals';
+import { THEME_EMOJI, thing } from '../visuals';
 import type { Interaction, InteractionContext, InteractionView } from './types';
 
 /** Zo ver moet een vinger bewegen voordat het slepen is (anders is het een tik). */
@@ -35,7 +35,7 @@ export function dragInteraction(ctx: InteractionContext): Interaction {
   confirm.addEventListener('click', submit);
 
   function makeItem(): HTMLButtonElement {
-    const item = el('button', { type: 'button', class: 'drag-item', 'aria-label': 'Voorwerp' }, itemEmoji);
+    const item = el('button', { type: 'button', class: 'drag-item', 'aria-label': 'Voorwerp' }, thing(itemEmoji));
     item.addEventListener('click', () => {
       if (suppressClick) {
         suppressClick = false;
@@ -112,7 +112,7 @@ export function dragInteraction(ctx: InteractionContext): Interaction {
     };
     const move = (ev: PointerEvent) => {
       if (!ghost && Math.hypot(ev.clientX - sx, ev.clientY - sy) > DRAG_THRESHOLD) {
-        ghost = el('span', { class: 'drag-ghost', 'aria-hidden': 'true' }, itemEmoji);
+        ghost = el('span', { class: 'drag-ghost', 'aria-hidden': 'true' }, thing(itemEmoji));
         document.body.append(ghost);
         item.classList.add('lifted');
       }
@@ -183,7 +183,7 @@ export function dragInteraction(ctx: InteractionContext): Interaction {
       // Hint: tel mee met getallen; bij aanvullen tellen de lege/gelegde vakjes vanaf 1.
       const n = op === 'makeTen' ? i - state.fixed + 1 : i + 1;
       const number = view.showHint && !isFixed && (op === 'makeTen' || isPlaced) ? el('span', { class: 'slot-number' }, String(n)) : null;
-      slot.replaceChildren(isFixed ? fixedEmoji : isPlaced ? itemEmoji : '', ...(number ? [number] : []));
+      slot.replaceChildren(isFixed ? thing(fixedEmoji) : isPlaced ? thing(itemEmoji) : '', ...(number ? [number] : []));
     });
     zone.classList.toggle('solved', view.solved);
     confirm.disabled = view.solved || state.placed === 0;

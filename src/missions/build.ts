@@ -39,12 +39,24 @@ export function adaptedLevel(spec: TaskSpec, shift: number): number {
  * Maakt één opdracht volgens `spec`; `seen` voorkomt dubbele opgaven binnen een
  * ronde. Bij een negatieve aanpassing worden altijd voorwerpen getoond.
  */
-export function buildTask(spec: TaskSpec, mission: Pick<Mission, 'theme'>, rng: Rng, seen = new Set<string>(), shift = 0): Task {
+export function buildTask(
+  spec: TaskSpec,
+  mission: Pick<Mission, 'theme'>,
+  rng: Rng,
+  seen = new Set<string>(),
+  shift = 0,
+  avoidAnswers: readonly number[] = [],
+): Task {
   const lv = { ...levelOf(spec.skill, adaptedLevel(spec, shift)), ...spec.tweak };
   // Op een getallenlijn blijft het antwoord altijd op de lijn.
   if (spec.line) lv.max = Math.min(lv.max, spec.line.max);
+  // Niet hetzelfde getal als de opdracht ervoor/erna, en liefst geen dubbele opgave in de ronde.
+  // Is dat samen onmogelijk (heel klein niveau), dan gaat "ander getal" voor.
+  const newNumber = (e: Exercise) => !avoidAnswers.includes(e.answer);
+  const ok = (e: Exercise) => newNumber(e) && !seen.has(exerciseKey(e));
   let ex: Exercise = generateExercise(spec.skill, lv, rng);
-  for (let i = 0; i < 30 && seen.has(exerciseKey(ex)); i++) ex = generateExercise(spec.skill, lv, rng);
+  for (let i = 0; i < 60 && !ok(ex); i++) ex = generateExercise(spec.skill, lv, rng);
+  for (let i = 0; i < 60 && !newNumber(ex); i++) ex = generateExercise(spec.skill, lv, rng);
   seen.add(exerciseKey(ex));
 
   const interaction = spec.interaction ?? defaultInteraction(spec);
@@ -85,7 +97,12 @@ export function withRepetition(specs: readonly TaskSpec[], adapt?: Adaptation): 
 export function buildRoundTasks(mission: Mission, round: number, rng: Rng, adapt?: Adaptation): Task[] {
   const r = mission.rounds[Math.max(0, Math.min(round, mission.rounds.length - 1))];
   const seen = new Set<string>();
-  return withRepetition(r.specs, adapt).map((spec) => buildTask(spec, mission, rng, seen, adapt?.shift(spec.skill) ?? 0));
+  const tasks: Task[] = [];
+  for (const spec of withRepetition(r.specs, adapt)) {
+    const prev = tasks[tasks.length - 1];
+    tasks.push(buildTask(spec, mission, rng, seen, adapt?.shift(spec.skill) ?? 0, prev ? [prev.exercise.answer] : []));
+  }
+  return tasks;
 }
 
 /**
@@ -94,5 +111,12 @@ export function buildRoundTasks(mission: Mission, round: number, rng: Rng, adapt
  */
 export function rebuildUpcoming(tasks: readonly Task[], fromIndex: number, skill: SkillId, mission: Pick<Mission, 'theme'>, rng: Rng, shift: number): Task[] {
   const seen = new Set(tasks.map((t) => exerciseKey(t.exercise)));
-  return tasks.map((t, i) => (i >= fromIndex && t.spec && t.spec.skill === skill ? buildTask(t.spec, mission, rng, seen, shift) : t));
+  const out = [...tasks];
+  for (let i = fromIndex; i < out.length; i++) {
+    const t = out[i];
+    if (!t.spec || t.spec.skill !== skill) continue;
+    const neighbours = [out[i - 1], out[i + 1]].filter(Boolean).map((n) => n.exercise.answer);
+    out[i] = buildTask(t.spec, mission, rng, seen, shift, neighbours);
+  }
+  return out;
 }

@@ -129,7 +129,8 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
   function startDemo(key: DemoKey): void {
     clearTimers();
     mode = 'demo-watch';
-    practice = startSession('demo', [demoTask(key, rng, mission.theme)]);
+    // Het voorbeeld heeft niet hetzelfde getal als de opdracht die erna komt.
+    practice = startSession('demo', [demoTask(key, rng, mission.theme, [currentTask(session).exercise.answer])]);
     resetTaskUi();
     render();
     speak(spokenText());
@@ -155,9 +156,10 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
       }
       hand.pointAt(null);
       later(CELEBRATE_MS, () => {
-        // Nu het kind: een nieuw voorbeeld van dezelfde soort.
+        // Nu het kind: een ánder voorbeeld van dezelfde soort (ander getal dan net en dan straks).
         mode = 'demo-try';
-        practice = startSession('demo', [demoTask(key, rng, mission.theme)]);
+        const shown = currentTask(practice!).exercise.answer;
+        practice = startSession('demo', [demoTask(key, rng, mission.theme, [shown, currentTask(session).exercise.answer])]);
         resetTaskUi();
         render();
         speak(spokenText());

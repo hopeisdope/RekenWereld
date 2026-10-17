@@ -2,6 +2,7 @@ import { bigButton, el } from '../dom';
 import { mascot } from '../mascot';
 import { playSound } from '../sound';
 import { speak } from '../speech';
+import { thing } from '../visuals';
 import { starRow } from '../widgets';
 import type { Screen } from './types';
 
@@ -51,7 +52,7 @@ export function resultScreen(info: ResultInfo, onAgain: () => void, onNext: () =
         ),
         starRow(info.roundsDone, info.totalRounds, info.newRound ? info.roundsDone - 1 : -1),
         info.unlocked.length
-          ? el('div', { class: 'unlocked', 'aria-label': 'Nieuwe missie open' }, el('span', { class: 'unlock-lock', 'aria-hidden': 'true' }, '🔓'), ...info.unlocked.map((icon) => el('span', { class: 'unlock-icon', 'aria-hidden': 'true' }, icon)))
+          ? el('div', { class: 'unlocked', 'aria-label': 'Nieuwe missie open' }, el('span', { class: 'unlock-lock', 'aria-hidden': 'true' }, '🔓'), ...info.unlocked.map((icon) => el('span', { class: 'unlock-icon', 'aria-hidden': 'true' }, thing(icon))))
           : null,
         el('div', { class: 'result-actions' }, again, next),
       ),

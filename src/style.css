@@ -957,3 +957,9 @@ h1 { margin: 0; font-size: clamp(28px, 4.5vmin, 44px); text-align: center; }
 .segmented button { min-height: 44px; padding: 0 14px; border: 0; background: #fff; font-size: 15px; }
 .segmented button + button { border-left: 1px solid #bdbdbd; }
 .segmented button.on { background: #1565c0; color: #fff; font-weight: 700; }
+
+/* Eén pootafdruk (SVG) in plaats van 🐾, zodat er niet dubbel geteld wordt */
+.paw-svg { width: 1em; height: 1em; display: block; fill: #6d4c41; }
+.tile-paw .paw-svg { width: 22px; height: 22px; opacity: 0.7; }
+.node-icon .paw-svg { width: 0.9em; height: 0.9em; }
+.unlock-icon .paw-svg { width: 1em; height: 1em; }

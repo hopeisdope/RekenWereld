@@ -28,6 +28,8 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 
 ## Klaar
 
+- [x] Feedback test: één pootafdruk i.p.v. 🐾 (dubbel tellen); geen hetzelfde getal na elkaar (2026-10-17)
+
 - [x] Fase 5: voortgang per vaardigheid, adaptieve regels, oudergedeelte, opslag v2 met herstel (2026-10-17)
 
 - [x] Fase 4: wereldkaart, SVG-mascotte, statussen, ontgrendelen, verzameling, eindscherm, geluid (2026-10-16)

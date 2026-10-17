@@ -9,9 +9,12 @@ Beknopte stand voor een nieuwe sessie. Details staan in `WORKLIST.md` en `IMPLEM
 - Lagen: `math/skills.ts` (vaardigheden + niveaus), `missions/` (leerlijnen, voorbeelden, kaart),
   `state/` (sessie, voortgang, wereld, hervatten, plaatsen, instellingen — alles puur),
   `presentation/` (schermen, bedieningsvormen, SVG-mascotte, geluid, spraak).
-- `npm run check` (lint + typecheck + 120 unit-tests + build) groen.
+- `npm run check` (lint + typecheck + 123 unit-tests + build) groen.
 - `e2e/nonreading.cjs` 17/17, `e2e/touch.cjs` 10/10, `e2e/progress.cjs` 11/11 groen (lokaal, headless Chromium);
   offline herladen werkt. GitHub Pages deploy slaagt; URL niet vanuit de container bereikbaar.
+
+- Na feedback van de eerste test: pootjes zijn nu één eigen afdruk (SVG); opeenvolgende opdrachten
+  en voorbeelden hebben nooit hetzelfde getal na elkaar.
 
 ## Nog te observeren met het kind
 - Begrijpt het de kaart: slotje = nog dicht, ring/▶ = bezig, vinkje = klaar? Volgt het de uil?

@@ -5,19 +5,23 @@ import type { PromptKind, Task, Theme } from './types';
 
 let counter = 0;
 
-/** Vaste, makkelijke voorbeelden. De mascotte doet er één voor, het kind probeert er één. */
-const EXAMPLES: Record<PromptKind, { op: Operation; operands: number[] }> = {
-  count: { op: 'count', operands: [4] },
-  recognize: { op: 'recognize', operands: [7] },
-  build: { op: 'build', operands: [3] },
-  compare: { op: 'compare', operands: [2, 5] },
-  order: { op: 'order', operands: [3, 1, 2] },
-  missing: { op: 'missing', operands: [3, 2, 4] },
-  add: { op: 'add', operands: [2, 1] },
-  subtract: { op: 'subtract', operands: [4, 1] },
-  split: { op: 'split', operands: [5, 2] },
-  makeTen: { op: 'makeTen', operands: [8] },
-  jump: { op: 'add', operands: [2, 2] },
+/**
+ * Vaste, makkelijke voorbeelden; per soort drie, met verschillende antwoorden.
+ * De mascotte doet er één voor, het kind probeert een ánder (geen herhaling van
+ * hetzelfde getal), en geen van beide heeft het getal van de eerstvolgende opdracht.
+ */
+const EXAMPLES: Record<PromptKind, { op: Operation; operands: number[] }[]> = {
+  count: [{ op: 'count', operands: [4] }, { op: 'count', operands: [3] }, { op: 'count', operands: [5] }],
+  recognize: [{ op: 'recognize', operands: [7] }, { op: 'recognize', operands: [4] }, { op: 'recognize', operands: [9] }],
+  build: [{ op: 'build', operands: [3] }, { op: 'build', operands: [2] }, { op: 'build', operands: [4] }],
+  compare: [{ op: 'compare', operands: [2, 5] }, { op: 'compare', operands: [6, 3] }, { op: 'compare', operands: [1, 4] }],
+  order: [{ op: 'order', operands: [3, 1, 2] }, { op: 'order', operands: [5, 6, 4] }, { op: 'order', operands: [2, 4, 3] }],
+  missing: [{ op: 'missing', operands: [3, 2, 4] }, { op: 'missing', operands: [1, 1, 4] }, { op: 'missing', operands: [5, 2, 4] }],
+  add: [{ op: 'add', operands: [2, 1] }, { op: 'add', operands: [1, 3] }, { op: 'add', operands: [2, 3] }],
+  subtract: [{ op: 'subtract', operands: [4, 1] }, { op: 'subtract', operands: [5, 3] }, { op: 'subtract', operands: [3, 2] }],
+  split: [{ op: 'split', operands: [5, 2] }, { op: 'split', operands: [4, 3] }, { op: 'split', operands: [6, 4] }],
+  makeTen: [{ op: 'makeTen', operands: [8] }, { op: 'makeTen', operands: [7] }, { op: 'makeTen', operands: [9] }],
+  jump: [{ op: 'add', operands: [2, 2] }, { op: 'add', operands: [3, 3] }, { op: 'add', operands: [1, 2] }],
 };
 
 const SKILL_FOR: Record<PromptKind, Parameters<typeof levelOf>[0]> = {
@@ -53,10 +57,14 @@ function answerOf(op: Operation, o: number[]): number {
   }
 }
 
-/** Voorbeeldopdracht voor een soort + bediening; telt niet mee voor de voortgang. */
-export function demoTask(key: DemoKey, rng: Rng, theme: Theme = 'paws'): Task {
+/**
+ * Voorbeeldopdracht voor een soort + bediening; telt niet mee voor de voortgang.
+ * `avoid`: antwoorden die net al voorkwamen of zo meteen komen (geen herhaling).
+ */
+export function demoTask(key: DemoKey, rng: Rng, theme: Theme = 'paws', avoid: readonly number[] = []): Task {
   const [kind, interaction] = key.split('/') as [PromptKind, Task['interaction']];
-  const { op, operands } = EXAMPLES[kind];
+  const options = EXAMPLES[kind];
+  const { op, operands } = options.find((e) => !avoid.includes(answerOf(e.op, e.operands))) ?? options[0];
   const id = `demo-${kind}-${++counter}`;
   const exercise: Exercise = {
     id,

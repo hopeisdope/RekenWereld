@@ -1,9 +1,33 @@
 import type { Task } from '../missions/types';
 import { el } from './dom';
 
+/** Eén pootafdruk. Het emoji 🐾 toont er twee, waardoor kinderen dubbel tellen. */
+export const PAW = 'paw';
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+export function pawSvg(): SVGSVGElement {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 40 40');
+  svg.setAttribute('class', 'paw-svg');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.innerHTML =
+    '<ellipse cx="20" cy="27" rx="9.5" ry="8"/>' +
+    '<ellipse cx="9" cy="16" rx="4" ry="5" transform="rotate(-20 9 16)"/>' +
+    '<ellipse cx="16" cy="9" rx="4" ry="5.2" transform="rotate(-6 16 9)"/>' +
+    '<ellipse cx="24" cy="9" rx="4" ry="5.2" transform="rotate(6 24 9)"/>' +
+    '<ellipse cx="31" cy="16" rx="4" ry="5" transform="rotate(20 31 16)"/>';
+  return svg;
+}
+
+/** Inhoud van één voorwerp: een emoji, of de eigen pootafdruk. */
+export function thing(token: string): Node | string {
+  return token === PAW ? pawSvg() : token;
+}
+
 /** Voorwerp per thema. */
 export const THEME_EMOJI: Record<Task['theme'], [string, string]> = {
-  paws: ['🐾', '🐾'],
+  paws: [PAW, PAW],
   apples: ['🍎', '🍏'],
   frog: ['🪨', '🪨'],
 };
@@ -31,7 +55,7 @@ export function items(emoji: string, n: number, numberFrom: number | null, extra
       el(
         'span',
         { class: faded ? 'item gone' : 'item', 'aria-hidden': 'true' },
-        emoji,
+        thing(emoji),
         numberFrom !== null && !faded ? el('span', { class: 'item-number' }, String(numberFrom + i)) : null,
       ),
     );
@@ -44,7 +68,7 @@ export function tenFrame(filled: number, emoji: string, hint: boolean): HTMLElem
   const frame = el('div', { class: 'ten-frame', 'aria-label': `${filled} van de 10` });
   for (let i = 0; i < 10; i++) {
     const full = i < filled;
-    frame.append(el('span', { class: full ? 'cell full' : 'cell empty' }, full ? emoji : hint ? String(i - filled + 1) : ''));
+    frame.append(el('span', { class: full ? 'cell full' : 'cell empty' }, full ? thing(emoji) : hint ? String(i - filled + 1) : ''));
   }
   return frame;
 }
@@ -78,7 +102,7 @@ export function visual(task: Task, hint: boolean): HTMLElement {
           el(
             'span',
             { class: i === gap ? 'path-tile gap' : 'path-tile' },
-            concrete && task.theme === 'paws' ? el('span', { class: 'tile-paw', 'aria-hidden': 'true' }, '🐾') : null,
+            concrete && task.theme === 'paws' ? el('span', { class: 'tile-paw', 'aria-hidden': 'true' }, pawSvg()) : null,
             el('span', { class: 'tile-number' }, i === gap ? '?' : String(start + i)),
           ),
         );
