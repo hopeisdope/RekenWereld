@@ -147,6 +147,7 @@ export function parentScreen(report: ParentReport, storage: StorageStatus, sound
     !storage.lastSaveOk ? el('p', { class: 'warning storage-warning' }, 'Opslaan lukt op dit moment niet (bijvoorbeeld privé-modus of volle opslag). Spelen kan gewoon, maar de voortgang wordt niet bewaard.') : null,
     storage.recovered === 'backup' ? el('p', { class: 'warning' }, 'De opgeslagen gegevens waren beschadigd; de vorige goede stand is teruggezet.') : null,
     storage.recovered === 'reset' ? el('p', { class: 'warning' }, 'De opgeslagen gegevens waren beschadigd en konden niet worden hersteld; de app is opnieuw begonnen.') : null,
+    el('p', { class: 'build-id' }, `Werkt ook zonder internet na het eerste bezoek. Updates worden vanzelf geladen als de app even dicht is; de voortgang blijft staan. Versie: ${document.documentElement.dataset.build ?? 'dev'}`),
   ];
 
   return {

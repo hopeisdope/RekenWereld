@@ -11,19 +11,22 @@ on:
 permissions:
   contents: read
 
+# Een lopende Pages-deploy niet halverwege afbreken; PR-builds mogen wel vervangen worden.
 concurrency:
   group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: npm
 
       - run: npm ci
@@ -36,6 +39,7 @@ jobs:
         run: npm run build
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
+          VITE_BUILD_ID: ${{ github.sha }}
 
       - name: Controleer build-output
         run: |
@@ -43,6 +47,12 @@ jobs:
           test -f dist/sw.js
           test -f dist/manifest.webmanifest
           grep -q 'src="/${{ github.event.repository.name }}/assets/' dist/index.html
+          grep -q 'href="/${{ github.event.repository.name }}/manifest.webmanifest"' dist/index.html
+          grep -q '"scope":"./"' dist/manifest.webmanifest
+          grep -q '"start_url":"./"' dist/manifest.webmanifest
+          grep -q 'url:"index.html"' dist/sw.js
+          # Geen absolute paden naar de domeinroot (buiten de app-scope).
+          ! grep -REn '(src|href)="/(assets|icons)/' dist/index.html
 
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'

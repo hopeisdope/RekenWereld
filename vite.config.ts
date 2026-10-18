@@ -15,8 +15,11 @@ export default defineConfig({
   },
   plugins: [
     VitePWA({
-      registerType: 'autoUpdate',
+      // 'prompt': een nieuwe versie wacht tot src/pwa.ts hem activeert (als de app uit
+      // beeld is), zodat er nooit midden in een opdracht herladen wordt.
+      registerType: 'prompt',
       injectRegister: false, // registratie gebeurt expliciet in src/pwa.ts
+      includeManifestIcons: false, // iconen zitten al in globPatterns (geen dubbele precache)
       manifest: {
         name: 'RekenWereld',
         short_name: 'RekenWereld',
@@ -24,6 +27,7 @@ export default defineConfig({
         lang: 'nl',
         dir: 'ltr',
         // Relatief t.o.v. het manifest, zodat het onder elke subdirectory klopt.
+        id: './',
         start_url: './',
         scope: './',
         display: 'standalone',
@@ -38,6 +42,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,svg,webp,woff2,mp3,m4a,json}'],
+        // Elke navigatie binnen de scope krijgt de gecachte app, ook offline.
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
       },

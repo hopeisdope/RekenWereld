@@ -6,12 +6,12 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 
 - [ ] Pages-URL openen op iPad: https://hopeisdope.github.io/RekenWereld/ (deploy slaagt; URL nog niet zelf in een browser bekeken)
 - [ ] Observatie met het kind: zie lijst in HANDOFF.md
-- [ ] Testen op fysieke iPad en iPad mini (touch, slepen, lokale NL-stem, geluid, beginscherm, offline)
+- [ ] Testen op fysieke iPad en iPad mini: checklist *Handmatige controles* in README.md
+  (installatie vanaf Pages-URL, veilige randen, staand/liggend, slepen, koude offline start, update)
 
 ## Volgende
 
 - [ ] `e2e/*.cjs` in CI draaien (Playwright als devDependency)
-- [ ] `navigator.storage.persist()` aanvragen (minder kans dat Safari gegevens wist)
 - [ ] Export/import van voortgang (Safari wist opslag na 7 dagen niet gebruiken, behalve op beginscherm)
 - [ ] Hervatten bewaart nu één onderbroken ronde; bij starten van een andere missie vervalt die
 - [ ] Definitieve illustraties (missie-iconen, dieren) als eigen SVG i.p.v. emoji
@@ -27,6 +27,9 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 - Minimale iPadOS-versie van de doel-iPads? (nu uitgegaan van 15+)
 
 ## Klaar
+
+- [x] Fase 6: PWA-publicatie gecontroleerd; updates pas als app uit beeld is, opslag-persist,
+  versie in oudergedeelte, strengere build-controle in CI, e2e/offline.cjs (2026-10-18)
 
 - [x] Voorlezen: beste lokale stem automatisch, tempo 1,0, pauze na afbreken; stem + tempo kiezen in oudergedeelte (2026-10-17)
 

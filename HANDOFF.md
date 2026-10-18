@@ -1,4 +1,4 @@
-# Handoff — 2026-10-17
+# Handoff — 2026-10-18
 
 Beknopte stand voor een nieuwe sessie. Details staan in `WORKLIST.md` en `IMPLEMENTATION_PLAN.md`.
 
@@ -18,6 +18,12 @@ Beknopte stand voor een nieuwe sessie. Details staan in `WORKLIST.md` en `IMPLEM
 
 - Voorlezen: app kiest de beste lokale NL-stem (verbeterd/premium eerst), tempo 1,0, korte pauze
   na afbreken; ouders kunnen stem en tempo kiezen (Voorlezen in het oudergedeelte). Niet zelf gehoord.
+
+- Fase 6 (PWA): service worker in `prompt`-modus; `src/pwa.ts` activeert een nieuwe versie pas
+  als de app uit beeld gaat en zoekt zelf naar updates (max. 1×/uur). `e2e/offline.cjs` 12/12:
+  scope, precache, koude start met server+netwerk uit, voortgang offline en na update.
+  Versie (commit-hash) staat in het oudergedeelte. Live Pages-URL is vanuit de container niet
+  bereikbaar (netwerkbeleid); handmatige iPad-checklist staat in README.md.
 
 ## Nog te observeren met het kind
 - Begrijpt het de kaart: slotje = nog dicht, ring/▶ = bezig, vinkje = klaar? Volgt het de uil?
