@@ -45,7 +45,8 @@ npm run check       # lint + typecheck + tests + build, zoals CI
   kiezen → voorbeeld → oplossen → fout herstellen → afronden → andere missie → alle 9 rondes).
   Antwoorden komen alleen uit de plaatjes, getallen en sommen of uit de wijzende hand.
 - `e2e/touch.cjs` — echt slepen, verkeerd loslaten, dubbel tikken, draaien van de iPad,
-  hervatten na 🏠 en na herladen, en "Beperk beweging" (liggend).
+  hervatten na 🏠 en na herladen, "Beperk beweging" (liggend), 🏠 tijdens het vieren van de
+  laatste opdracht (ronde blijft bewaard) en tikken naast een voorwerp in de voorraad.
 - `e2e/progress.cjs` — heropenen na afsluiten, makkelijker na herhaalde fouten, ouderpoort,
   niveau aanpassen, reset met bevestiging, volle/kapotte opslag en oude opslag (schema 1).
 

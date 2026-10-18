@@ -47,6 +47,14 @@ export function dragInteraction(ctx: InteractionContext): Interaction {
     return item;
   }
   for (let i = 0; i < state.tray; i++) tray.append(makeItem());
+  // Net naast een voorwerp getikt (tussenruimte of rand van de voorraad): toch leggen. Zo
+  // is de hele voorraadrij één groot tikdoel, ook waar de voorwerpen kleiner zijn dan 88 px.
+  const trayRow = el('div', { class: 'tray-row' }, tray, confirm);
+  trayRow.addEventListener('click', (e) => {
+    const first = tray.querySelector<HTMLButtonElement>('.drag-item');
+    if ((e.target !== tray && e.target !== trayRow) || !first || first.disabled) return;
+    placeFrom(first, first.getBoundingClientRect());
+  });
 
   function locked(): boolean {
     return view.solved;
@@ -194,7 +202,7 @@ export function dragInteraction(ctx: InteractionContext): Interaction {
   draw();
 
   return {
-    el: el('div', { class: `drag-task drag-${op}` }, zone, el('div', { class: 'tray-row' }, tray, confirm)),
+    el: el('div', { class: `drag-task drag-${op}` }, zone, trayRow),
     update(v) {
       view = v;
       draw();

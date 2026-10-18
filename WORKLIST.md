@@ -11,6 +11,8 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 
 ## Volgende
 
+- [ ] Open punten uit BRUIKBAARHEID.md: sleep-voorwerpen/vakjes < 88 px (uitzondering vastleggen of
+  indeling aanpassen), smalle stenen op de getallenlijn tot 20, lege vergelijk-knop bij 0
 - [ ] `e2e/*.cjs` in CI draaien (Playwright als devDependency)
 - [ ] Export/import van voortgang (Safari wist opslag na 7 dagen niet gebruiken, behalve op beginscherm)
 - [ ] Hervatten bewaart nu één onderbroken ronde; bij starten van een andere missie vervalt die
@@ -27,6 +29,9 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 - Minimale iPadOS-versie van de doel-iPads? (nu uitgegaan van 15+)
 
 ## Klaar
+
+- [x] Fase 7: bruikbaarheidscontrole (zonder kind) — 🏠 tijdens vieren verloor de ronde, terugspringen
+  zonder voorbeeld, voorraad als één tikdoel; bevindingen in BRUIKBAARHEID.md (2026-10-18)
 
 - [x] Fase 6: PWA-publicatie gecontroleerd; updates pas als app uit beeld is, opslag-persist,
   versie in oudergedeelte, strengere build-controle in CI, e2e/offline.cjs (2026-10-18)

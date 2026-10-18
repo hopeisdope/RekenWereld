@@ -50,7 +50,7 @@ const line20 = { min: 0, max: 20 };
 const jump = (skill: 'add' | 'subtract', level: number, maxSecond: number, line: { min: number; max: number }, support: TaskSpec['support'] = 'concrete'): TaskSpec => ({
   skill,
   level,
-  prompt: 'jump',
+  prompt: skill === 'add' ? 'jump' : 'jumpBack',
   interaction: 'numberline',
   tweak: { min: 1, maxSecond },
   line,

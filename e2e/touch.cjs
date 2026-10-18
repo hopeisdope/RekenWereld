@@ -147,5 +147,58 @@ const { sleep, tap } = h;
   } finally {
     await rm.browser.close();
   }
+  // --- Fase 7: 🏠 tijdens het vieren van de laatste opdracht; tik naast een voorwerp ---
+  const fin = await h.launch();
+  try {
+    await tap(fin.page, '.play-button');
+    await tap(fin.page, '.mission-tile[data-mission="voetstappen"]');
+    for (;;) {
+      const st = await h.waitReady(fin.page);
+      if (st === 'demo') {
+        await h.doDemo(fin.page, 'fin');
+        continue;
+      }
+      const last = (await h.nowIndex(fin.page)) === (await fin.page.evaluate(() => document.querySelectorAll('.dot').length)) - 1;
+      await h.solveCurrent(fin.page);
+      if (last) break;
+    }
+    await tap(fin.page, '.topbar .icon-button'); // 🏠 meteen na het goede antwoord
+    await fin.page.waitForSelector('.result', { timeout: 3000 });
+    await fin.page.reload();
+    await tap(fin.page, '.play-button');
+    await fin.page.waitForSelector('.mission-tile');
+    const kept = await fin.page.evaluate(() => ({
+      stars: document.querySelectorAll('[data-mission="voetstappen"] .star.on').length,
+      next: document.querySelector('[data-mission="appelmand"]').dataset.status,
+    }));
+    r.step(11, `🏠 tijdens het vieren van de laatste opdracht: beloning getoond, ronde bewaard na herladen (${JSON.stringify(kept)})`, kept.stars === 1 && kept.next === 'available');
+
+    await tap(fin.page, '.mission-tile[data-mission="appelmand"]');
+    let gap = null;
+    for (let i = 0; i < 20 && gap === null; i++) {
+      const st = await h.waitReady(fin.page);
+      if (st === 'demo') {
+        await h.doDemo(fin.page, 'fin-a');
+        continue;
+      }
+      if ((await h.interactionKind(fin.page)) !== 'drag') {
+        await h.solveCurrent(fin.page);
+        continue;
+      }
+      // Lege rand van de voorraad, links van de voorwerpen (daar gebeurde eerder niets).
+      const box = await fin.page.locator('.tray').boundingBox();
+      const [gx, gy] = [box.x + 12, box.y + box.height / 2];
+      const before = await fin.page.evaluate(() => document.querySelectorAll('.slot.placed').length);
+      const hit = await fin.page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.className, [gx, gy]);
+      await fin.page.touchscreen.tap(gx, gy);
+      await sleep(300);
+      gap = { hit, before, after: await fin.page.evaluate(() => document.querySelectorAll('.slot.placed').length) };
+    }
+    r.step(12, `Tik in de voorraad naast een voorwerp legt er één in de mand (${JSON.stringify(gap)})`, gap && ['tray', 'tray-row'].includes(gap.hit) && gap.after === gap.before + 1);
+  } catch (e) {
+    r.step('11/12', `Afgebroken: ${e.message.split('\n')[0]}`, false);
+  } finally {
+    await fin.browser.close();
+  }
   r.print();
 })();

@@ -110,7 +110,7 @@ const { sleep, tap } = h;
         res.kinds.forEach((k) => allKinds.add(k));
       }
     }
-    const expected = ['add', 'build', 'compare', 'count', 'jump', 'makeTen', 'missing', 'order', 'recognize', 'split', 'subtract'];
+    const expected = ['add', 'build', 'compare', 'count', 'jump', 'jumpBack', 'makeTen', 'missing', 'order', 'recognize', 'split', 'subtract'];
     r.step(10, `Alle 9 rondes uitgespeeld; soorten: ${[...allKinds].sort().join(', ')}`, expected.every((k) => allKinds.has(k)));
     await tap(page, '.result .play-button.next');
     await page.waitForSelector('.mission-tile');

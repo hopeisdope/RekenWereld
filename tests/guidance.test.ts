@@ -9,7 +9,7 @@ import { demoNeeded, shouldPointAtAnswer } from '../src/state/guidance';
 import { DEFAULT_SETTINGS, demoKey, markDemoSeen, parseSettings, type DemoKey } from '../src/state/settings';
 import { currentTask, reduce, startSession } from '../src/state/session';
 
-const KINDS: PromptKind[] = ['count', 'recognize', 'build', 'compare', 'order', 'missing', 'add', 'subtract', 'split', 'makeTen', 'jump'];
+const KINDS: PromptKind[] = ['count', 'recognize', 'build', 'compare', 'order', 'missing', 'add', 'subtract', 'split', 'makeTen', 'jump', 'jumpBack'];
 
 describe('voorbeelden (voordoen en zelf proberen)', () => {
   it('elke soort opdracht in de missies heeft een geldig voorbeeld', () => {
@@ -25,7 +25,7 @@ describe('voorbeelden (voordoen en zelf proberen)', () => {
   });
 
   it('een voorbeeld is op te lossen met de gewone missieflow', () => {
-    const keys: DemoKey[] = [...KINDS.map((k) => `${k}/choice` as DemoKey), 'jump/numberline', 'order/sequence', 'build/drag', 'makeTen/drag'];
+    const keys: DemoKey[] = [...KINDS.map((k) => `${k}/choice` as DemoKey), 'jump/numberline', 'jumpBack/numberline', 'order/sequence', 'build/drag', 'makeTen/drag'];
     for (const key of keys) {
       let s = startSession('demo', [demoTask(key, seededRng(3))]);
       for (const v of currentTask(s).exercise.steps ?? [currentTask(s).exercise.answer]) s = reduce(s, { type: 'answer', taskId: currentTask(s).id, value: v });
@@ -38,6 +38,15 @@ describe('voorbeelden (voordoen en zelf proberen)', () => {
     expect(demoNeeded(task, [])).toBe('build/drag');
     const seen = markDemoSeen(DEFAULT_SETTINGS, 'build/drag').seenDemos;
     expect(demoNeeded(task, seen)).toBeNull();
+  });
+
+  it('terug springen krijgt een eigen voorbeeld, ook als vooruit springen al is voorgedaan (fase 7)', () => {
+    const first = buildRoundTasks(missions.rivier, 1, seededRng(6))[0];
+    expect(first.exercise.operation).toBe('subtract');
+    expect(demoNeeded(first, ['jump/numberline'])).toBe('jumpBack/numberline');
+    const demo = demoTask('jumpBack/numberline', seededRng(6));
+    expect(demo.exercise.operation).toBe('subtract');
+    expect(demo.exercise.answer).toBeLessThan(demo.exercise.operands[0]);
   });
 
   it('voetstappen introduceert tellen én getallen zoeken met elk een eigen voorbeeld', () => {

@@ -7,9 +7,10 @@ export type InteractionKind = 'choice' | 'numberline' | 'sequence' | 'drag';
 /**
  * Soort opdracht zoals het kind hem ziet; bepaalt de weergave en welk
  * voorbeeld wordt voorgedaan. Meestal gelijk aan de vaardigheid; 'jump' is
- * optellen/aftrekken op de getallenlijn.
+ * vooruit springen (optellen) en 'jumpBack' terug springen (aftrekken) op de
+ * getallenlijn: elk een eigen voorbeeld.
  */
-export type PromptKind = SkillId | 'jump';
+export type PromptKind = SkillId | 'jump' | 'jumpBack';
 
 /**
  * Ondersteuning: 'concrete' toont voorwerpen bij de getallen; 'abstract'

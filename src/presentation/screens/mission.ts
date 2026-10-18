@@ -36,7 +36,13 @@ export interface MissionCallbacks {
   onDemoSeen(key: DemoKey): void;
   /** Tussenstand voor hervatten (null = niets te hervatten). */
   onProgress(point: ResumePoint | null): void;
-  onFinish(stars: 1 | 2 | 3): void;
+  /**
+   * De laatste opdracht is goed: de ronde telt meteen (en wordt bewaard), ook
+   * als het kind daarna nog op 🏠 tikt of de app sluit.
+   */
+  onRoundDone(stars: 1 | 2 | 3): void;
+  /** Eindscherm tonen (na het vieren, of direct bij 🏠 tijdens het vieren). */
+  onFinish(): void;
   onQuit(): void;
   sound?(kind: SoundKind): void;
   /**
@@ -119,7 +125,16 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
     return mode === 'demo-try' ? `${DEMO_TRY} ${promptText(task)}` : promptText(task);
   }
 
+  /** Ronde helemaal goed en al bewaard; het eindscherm komt nog. */
+  let roundDone = false;
+
   function quit(): void {
+    if (roundDone) {
+      // Tijdens het vieren van de laatste opdracht: de beloning is verdiend.
+      clearTimers();
+      cb.onFinish();
+      return;
+    }
     cb.onProgress(snapshot(session, round));
     cb.onQuit();
   }
@@ -247,12 +262,17 @@ export function missionScreen(mission: Mission, round: number, rng: () => number
     // Voortgang per vaardigheid; bij een niveauwijziging de komende opdrachten aanpassen.
     const change = cb.onTaskDone?.(currentTask(session), session.mistakes);
     if (change) session = replaceUpcoming(session, rebuildUpcoming(session.tasks, session.index + 1, change.skill, mission, rng, change.shift));
-    cb.onProgress(snapshot(session, round));
+    if (session.index === session.tasks.length - 1) {
+      roundDone = true;
+      cb.onProgress(null);
+      cb.onRoundDone(starsFor(session));
+    } else {
+      cb.onProgress(snapshot(session, round));
+    }
     later(CELEBRATE_MS, () => {
       session = reduce(session, { type: 'next' });
       if (session.phase === 'finished') {
-        cb.onProgress(null);
-        cb.onFinish(starsFor(session));
+        cb.onFinish();
         return;
       }
       showCurrent();

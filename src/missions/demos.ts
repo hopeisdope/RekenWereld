@@ -22,6 +22,7 @@ const EXAMPLES: Record<PromptKind, { op: Operation; operands: number[] }[]> = {
   split: [{ op: 'split', operands: [5, 2] }, { op: 'split', operands: [4, 3] }, { op: 'split', operands: [6, 4] }],
   makeTen: [{ op: 'makeTen', operands: [8] }, { op: 'makeTen', operands: [7] }, { op: 'makeTen', operands: [9] }],
   jump: [{ op: 'add', operands: [2, 2] }, { op: 'add', operands: [3, 3] }, { op: 'add', operands: [1, 2] }],
+  jumpBack: [{ op: 'subtract', operands: [5, 2] }, { op: 'subtract', operands: [6, 2] }, { op: 'subtract', operands: [7, 2] }],
 };
 
 const SKILL_FOR: Record<PromptKind, Parameters<typeof levelOf>[0]> = {
@@ -36,6 +37,7 @@ const SKILL_FOR: Record<PromptKind, Parameters<typeof levelOf>[0]> = {
   split: 'split',
   makeTen: 'makeTen',
   jump: 'add',
+  jumpBack: 'subtract',
 };
 
 function answerOf(op: Operation, o: number[]): number {

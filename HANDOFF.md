@@ -1,4 +1,4 @@
-# Handoff — 2026-10-18
+# Handoff — 2026-10-18 (na fase 7)
 
 Beknopte stand voor een nieuwe sessie. Details staan in `WORKLIST.md` en `IMPLEMENTATION_PLAN.md`.
 
@@ -9,8 +9,8 @@ Beknopte stand voor een nieuwe sessie. Details staan in `WORKLIST.md` en `IMPLEM
 - Lagen: `math/skills.ts` (vaardigheden + niveaus), `missions/` (leerlijnen, voorbeelden, kaart),
   `state/` (sessie, voortgang, wereld, hervatten, plaatsen, instellingen — alles puur),
   `presentation/` (schermen, bedieningsvormen, SVG-mascotte, geluid, spraak).
-- `npm run check` (lint + typecheck + 123 unit-tests + build) groen.
-- `e2e/nonreading.cjs` 17/17, `e2e/touch.cjs` 10/10, `e2e/progress.cjs` 11/11 groen (lokaal, headless Chromium);
+- `npm run check` (lint + typecheck + 129 unit-tests + build) groen.
+- `e2e/nonreading.cjs` 17/17, `e2e/touch.cjs` 12/12, `e2e/progress.cjs` 11/11 groen (lokaal, headless Chromium);
   offline herladen werkt. GitHub Pages deploy slaagt; URL niet vanuit de container bereikbaar.
 
 - Na feedback van de eerste test: pootjes zijn nu één eigen afdruk (SVG); opeenvolgende opdrachten
@@ -25,7 +25,13 @@ Beknopte stand voor een nieuwe sessie. Details staan in `WORKLIST.md` en `IMPLEM
   Versie (commit-hash) staat in het oudergedeelte. Live Pages-URL is vanuit de container niet
   bereikbaar (netwerkbeleid); handmatige iPad-checklist staat in README.md.
 
+- Fase 7 (bruikbaarheidscontrole, zonder kind): zie `BRUIKBAARHEID.md`. Opgelost: 🏠 tijdens het
+  vieren van de laatste opdracht verloor de hele ronde; terugspringen (`jumpBack`) heeft nu een eigen
+  voorbeeld; tik in de voorraad naast een voorwerp legt er één. `e2e/touch.cjs` 12/12.
+
 ## Nog te observeren met het kind
+- Terugspringen: begrijpelijk na het nieuwe voorbeeld? Vindt het kind ❓ als het vastzit?
+- Getallenlijn tot 20: tikt het op de (smalle) stenen of gebruikt het ⬅️/➡️?
 - Begrijpt het de kaart: slotje = nog dicht, ring/▶ = bezig, vinkje = klaar? Volgt het de uil?
 - Herkent het de drie iconen (pootjes, mand, kikker) zonder uitleg?
 - Slepen of tikken: wat doet het kind uit zichzelf? Lukt slepen op de iPad mini?

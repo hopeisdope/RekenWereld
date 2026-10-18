@@ -30,7 +30,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = { sound: true, seenDemos: [], levelOverrides: {}, voiceURI: null, speechRate: 'normal' };
 
-const PROMPTS = ['count', 'recognize', 'build', 'compare', 'order', 'missing', 'add', 'subtract', 'split', 'makeTen', 'jump'];
+const PROMPTS = ['count', 'recognize', 'build', 'compare', 'order', 'missing', 'add', 'subtract', 'split', 'makeTen', 'jump', 'jumpBack'];
 const INTERACTIONS = ['choice', 'numberline', 'sequence', 'drag'];
 
 /**

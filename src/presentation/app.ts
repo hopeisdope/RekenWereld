@@ -121,6 +121,8 @@ export function startApp(
     const mission = missions[id];
     const resumeHere = replayRound === undefined && resume?.missionId === id && resume.round < mission.rounds.length ? resume : undefined;
     const round = replayRound ?? resumeHere?.round ?? nextRound(progress, id, mission.rounds.length);
+    /** Voortgang van vóór deze ronde (voor nieuwe ster, nieuw dier en ontgrendelen). */
+    let progressBefore = progress;
     show(
       missionScreen(
         mission,
@@ -145,18 +147,20 @@ export function startApp(
             save();
             return after !== before ? { skill, shift: after } : null;
           },
-          onFinish: (stars) => {
-            const before = progress;
+          onRoundDone: (stars) => {
+            progressBefore = progress;
             progress = recordResult(progress, id, stars, round, mission.rounds.length);
             save();
-            const unlocked = newlyUnlocked(order, before, progress);
+          },
+          onFinish: () => {
+            const unlocked = newlyUnlocked(order, progressBefore, progress);
             show(
               resultScreen(
                 {
                   reward: mission.rounds[round].reward,
                   roundsDone: progress[id].roundsDone,
                   totalRounds: mission.rounds.length,
-                  newRound: progress[id].roundsDone > (before[id]?.roundsDone ?? 0),
+                  newRound: progress[id].roundsDone > (progressBefore[id]?.roundsDone ?? 0),
                   unlocked: unlocked.map((u) => GETALLENBOS_MAP.nodes[u].icon),
                 },
                 () => goMission(id, round),

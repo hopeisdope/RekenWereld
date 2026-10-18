@@ -45,6 +45,7 @@ export function promptText(task: Task): string {
     case 'makeTen':
       return `Hoeveel erbij om tien te maken?`;
     case 'jump':
+    case 'jumpBack':
       return task.exercise.operation === 'add'
         ? `De kikker zit op ${a}. Spring ${numberWord(b)} ${b === 1 ? 'steen' : 'stenen'} vooruit.`
         : `De kikker zit op ${a}. Spring ${numberWord(b)} ${b === 1 ? 'steen' : 'stenen'} terug.`;
@@ -73,6 +74,7 @@ export function hintText(task: Task): string {
     case 'makeTen':
       return 'Tel de lege plekjes.';
     case 'jump':
+    case 'jumpBack':
       return 'Volg de gele stenen en tel de sprongen.';
   }
 }
