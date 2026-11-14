@@ -11,7 +11,14 @@ const { tap } = h;
   const { browser, page, errors, foreign } = await h.launch();
   const origin = new URL(h.APP_URL).origin;
   try {
-    const onStart = await page.locator('[data-portal]').count();
+    // Beginscherm: hetzelfde huisje rechtsboven.
+    const start = await page.evaluate(() => {
+      const b = document.querySelector('.start [data-portal]');
+      if (!b) return null;
+      const box = b.getBoundingClientRect();
+      return { w: box.width, h: box.height, svg: !!b.querySelector('svg'), text: b.textContent.trim(), label: b.getAttribute('aria-label') || '', right: Math.round(innerWidth - box.right), top: Math.round(box.top) };
+    });
+    await page.screenshot({ path: `${h.SP}/portal-start.png` });
     await tap(page, '.play-button');
     await page.waitForSelector('.map');
     const btn = await page.evaluate(() => {
@@ -20,8 +27,19 @@ const { tap } = h;
       const box = b.getBoundingClientRect();
       return { w: box.width, h: box.height, svg: !!b.querySelector('svg'), emojiOrText: b.textContent.trim(), label: b.getAttribute('aria-label') || '', isIconButton: b.classList.contains('icon-button') };
     });
-    r.step(1, `Op de kaart: SVG-huisje ${btn && `${btn.w}×${btn.h}`} px, zonder tekst, met aria-label; niet op het startscherm (${onStart})`,
-      btn && btn.w >= 88 && btn.h >= 88 && btn.svg && btn.emojiOrText === '' && btn.label.length > 0 && !btn.isIconButton && onStart === 0);
+    const gear = await page.evaluate(() => {
+      const g = document.querySelector('.map-screen .topbar .icon-button');
+      return g && { svg: !!g.querySelector('svg.gear-svg'), text: g.textContent.trim(), w: g.getBoundingClientRect().width };
+    });
+    r.step(1, `Op de kaart: SVG-huisje ${btn && `${btn.w}×${btn.h}`} px, zonder tekst, met aria-label`,
+      btn && btn.w >= 88 && btn.h >= 88 && btn.svg && btn.emojiOrText === '' && btn.label.length > 0 && !btn.isIconButton);
+    r.step('1b', `Op het beginscherm: zelfde huisje rechtsboven (${start && `${start.w}×${start.h}`} px)`,
+      start && start.w >= 88 && start.h >= 88 && start.svg && start.text === '' && start.label === btn?.label);
+    r.step('1c', `Op de kaart: tandwiel (SVG, geen 🏠) i.p.v. huisje terug naar het begin (${gear && gear.w} px)`, gear && gear.svg && gear.text === '' && gear.w >= 88);
+    await tap(page, '.map-screen .topbar .icon-button');
+    await page.waitForSelector('.start .play-button');
+    await tap(page, '.play-button');
+    await page.waitForSelector('.map');
     await page.screenshot({ path: `${h.SP}/portal-map.png` });
 
     // Midden in een opdracht is er geen portalknop.
@@ -51,15 +69,14 @@ const { tap } = h;
     r.step(4, `Voortgang bewaard vóór het weggaan (sterren ${saved?.progress?.voetstappen?.stars ?? '-'}, hervatten bij ronde ${saved?.resume?.round ?? '-'})`,
       !!saved && JSON.stringify(saved.progress) === JSON.stringify(expected.progress) && JSON.stringify(saved.resume) === JSON.stringify(expected.resume) && !!saved.resume);
 
-    // Beperk beweging: meteen weg, zonder indruk-animatie.
+    // Beperk beweging, vanaf het beginscherm: meteen weg, zonder indruk-animatie.
     await page.goto(h.APP_URL);
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await tap(page, '.play-button');
-    await page.waitForSelector('.map');
+    await page.waitForSelector('.start [data-portal]');
     const t0 = Date.now();
     await tap(page, '[data-portal]');
     await page.waitForURL(`${origin}/`, { timeout: 5000 });
-    r.step(5, `Met "Beperk beweging" ook naar de portal (${Date.now() - t0} ms)`, page.url() === `${origin}/`);
+    r.step(5, `Vanaf het beginscherm met "Beperk beweging" ook naar de portal (${Date.now() - t0} ms)`, page.url() === `${origin}/`);
     r.step(6, `Geen JS-fouten (${errors.length}), geen externe verzoeken (${foreign.length})`, errors.length === 0 && foreign.length === 0);
   } catch (e) {
     r.step('!', `Afgebroken: ${e.message.split('\n')[0]}`, false);

@@ -82,7 +82,15 @@ export function startApp(
     maxTasks: ADAPTIVE_RULES.maxTasksPerRound,
   });
 
-  const goStart = () => show(startScreen(settings.sound, () => goSelect(), toggleSound, () => openParentGate(ui, Math.random, goParents)));
+  /** Naar de spelletjesportal: eerst alles bewaren, dan pas de pagina verlaten. */
+  const leaveToPortal = () => {
+    save();
+    current?.destroy?.();
+    goToPortal();
+  };
+
+  const goStart = () =>
+    show(startScreen(settings.sound, () => goSelect(), toggleSound, () => openParentGate(ui, Math.random, goParents), leaveToPortal));
 
   const goParents = () => {
     const report = parentReport(stats, settings.levelOverrides, progress, allMissions);
@@ -116,12 +124,7 @@ export function startApp(
   };
 
   const goSelect = (justUnlocked: readonly string[] = []) => show(
-      mapScreen(progress, resume, justUnlocked, goMission, goStart, () => {
-        // Eerst alles bewaren, dan pas de pagina verlaten.
-        save();
-        current?.destroy?.();
-        goToPortal();
-      }),
+      mapScreen(progress, resume, justUnlocked, goMission, goStart, leaveToPortal),
     );
 
   /** Missie openen: een onderbroken ronde gaat verder waar hij was, anders de volgende ronde. */

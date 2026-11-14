@@ -994,3 +994,8 @@ h1 { margin: 0; font-size: clamp(28px, 4.5vmin, 44px); text-align: center; }
   .portal-button:active,
   .portal-button.leaving { transform: none; }
 }
+/* Beginscherm: huisje rechtsboven (zoals op de kaart); het kleine geluidsknopje schuift ernaast. */
+.start .start-portal { position: absolute; top: 0; right: 0; }
+.start .small-corner:not(.left) { right: calc(var(--tap) + 12px); }
+.gear-button { padding: 12px; display: inline-flex; align-items: center; justify-content: center; }
+.gear-button .gear-svg { width: 100%; height: 100%; display: block; }

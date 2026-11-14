@@ -96,4 +96,6 @@ export const DEMO_TRY = 'Nu jij!';
 export const PICK_MISSION = 'Tik op een plaatje om te spelen.';
 /** Alleen voor schermlezers (aria-label); het kind herkent het huisje. */
 export const PORTAL_LABEL = 'Naar alle spelletjes';
+/** Alleen voor schermlezers: het tandwiel op de kaart gaat terug naar het beginscherm. */
+export const TO_START_LABEL = 'Naar het begin';
 export const PLAY = 'Tik op de grote knop om te spelen!';

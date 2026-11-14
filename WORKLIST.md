@@ -13,6 +13,8 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 
 - [ ] Open punten uit BRUIKBAARHEID.md: sleep-voorwerpen/vakjes < 88 px (uitzondering vastleggen of
   indeling aanpassen), smalle stenen op de getallenlijn tot 20, lege vergelijk-knop bij 0
+- [ ] `e2e/nonreading.cjs` faalt soms bij ordenen in ronde 3 ("antwoord 1,2,3 niet goed"), slaagt bij
+  opnieuw draaien: test of ordenen-interactie robuuster maken (2026-11-14)
 - [ ] `e2e/*.cjs` in CI draaien (Playwright als devDependency)
 - [ ] Export/import van voortgang (Safari wist opslag na 7 dagen niet gebruiken, behalve op beginscherm)
 - [ ] Hervatten bewaart nu één onderbroken ronde; bij starten van een andere missie vervalt die
@@ -26,12 +28,14 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 - Getal zoeken is 'hetzelfde getal vinden'; hoor-naar-symbool alleen met spraak. Voldoende?
 - Vergelijken vraagt alleen "meer"; "minder" vraagt een symbool dat zonder lezen werkt. Nodig?
 - 🏠 stopt direct zonder bevestiging (voortgang wordt bewaard): per ongeluk tikken een probleem?
-- Wereldkaart heeft nu twee huisjes: 🏠 links (terug naar start) en het SVG-huisje rechts (naar de
-  spelletjesportal). Verwart dat het kind? Eventueel 🏠 op de kaart door een ander symbool vervangen.
+- Tijdens een opdracht staat nog 🏠 (stoppen → terug naar de kaart). Ook vervangen, nu het huisje
+  op kaart en beginscherm "naar alle spelletjes" betekent?
 - Minimale iPadOS-versie van de doel-iPads? (nu uitgegaan van 15+)
 
 ## Klaar
 
+- [x] Kaart: 🏠 (terug naar begin) vervangen door SVG-tandwiel; portal-huisje ook rechtsboven op het
+  beginscherm (geluidsknopje schuift ernaast); `e2e/portal.cjs` 8/8 (2026-11-14)
 - [x] Thuisknop naar de spelletjesportal (root van de origin) op de wereldkaart: SVG-huisje,
   bewaart voortgang vóór het weggaan; `tests/portal.test.ts` + `e2e/portal.cjs` 6/6 (2026-11-14)
 
