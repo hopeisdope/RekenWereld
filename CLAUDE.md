@@ -38,6 +38,8 @@ npm run check                # lint + typecheck + tests + build, zoals CI
 - `src/math` en `src/missions` blijven puur (geen DOM) en volledig unit-getest.
 - Nooit hardgecodeerde paden naar `/RekenWereld/`: gebruik `import.meta.env.BASE_URL`,
   absolute `/…`-paden in `index.html` (Vite zet de base ervoor) of relatieve paden.
+  Enige uitzondering: de thuisknop naar de spelletjesportal (`presentation/portal.ts`) gaat naar
+  `location.origin + '/'`.
 - Knoppen en sleepdoelen minimaal 88×88 CSS-px; niets mag alleen via tekst te begrijpen zijn.
   Uitzondering: stenen op de getallenlijn 0–10 (≥ 56 px breed, 112 px hoog, aansluitend).
 - Lagen: `math` → `missions` → `state` (pure reducers) → `presentation` (DOM/canvas).

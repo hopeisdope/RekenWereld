@@ -12,6 +12,7 @@ import { SCHEMA_VERSION, type Storage } from '../storage/storage';
 import { mapScreen } from './screens/map';
 import { missionScreen, type SoundKind } from './screens/mission';
 import { parentScreen } from './screens/parent';
+import { goToPortal } from './portal';
 import { openParentGate } from './screens/parentGate';
 import { resultScreen } from './screens/result';
 import { startScreen } from './screens/start';
@@ -114,7 +115,14 @@ export function startApp(
     );
   };
 
-  const goSelect = (justUnlocked: readonly string[] = []) => show(mapScreen(progress, resume, justUnlocked, goMission, goStart));
+  const goSelect = (justUnlocked: readonly string[] = []) => show(
+      mapScreen(progress, resume, justUnlocked, goMission, goStart, () => {
+        // Eerst alles bewaren, dan pas de pagina verlaten.
+        save();
+        current?.destroy?.();
+        goToPortal();
+      }),
+    );
 
   /** Missie openen: een onderbroken ronde gaat verder waar hij was, anders de volgende ronde. */
   const goMission = (id: string, replayRound?: number) => {

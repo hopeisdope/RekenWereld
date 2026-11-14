@@ -967,3 +967,30 @@ h1 { margin: 0; font-size: clamp(28px, 4.5vmin, 44px); text-align: center; }
 /* Oudergedeelte: voorlezen */
 .voice-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .voice-select { min-height: 48px; max-width: 100%; padding: 0 12px; border: 1px solid #bdbdbd; border-radius: 12px; background: #fff; font-size: 17px; }
+
+/* ---------- Thuisknop naar de spelletjesportal (alleen op de wereldkaart) ---------- */
+
+.portal-button {
+  width: var(--tap);
+  height: var(--tap);
+  min-width: var(--tap);
+  min-height: var(--tap);
+  flex: none;
+  padding: 10px;
+  border: 0;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease-out;
+}
+.portal-button .house-svg { width: 100%; height: 100%; display: block; }
+.portal-button:active,
+.portal-button.leaving { transform: scale(0.9); }
+@media (prefers-reduced-motion: reduce) {
+  .portal-button { transition: none; }
+  .portal-button:active,
+  .portal-button.leaving { transform: none; }
+}

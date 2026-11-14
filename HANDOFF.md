@@ -1,4 +1,4 @@
-# Handoff — 2026-10-18 (na fase 7)
+# Handoff — 2026-11-14 (thuisknop naar portal)
 
 Beknopte stand voor een nieuwe sessie. Details staan in `WORKLIST.md` en `IMPLEMENTATION_PLAN.md`.
 
@@ -29,7 +29,14 @@ Beknopte stand voor een nieuwe sessie. Details staan in `WORKLIST.md` en `IMPLEM
   vieren van de laatste opdracht verloor de hele ronde; terugspringen (`jumpBack`) heeft nu een eigen
   voorbeeld; tik in de voorraad naast een voorwerp legt er één. `e2e/touch.cjs` 12/12.
 
+- Thuisknop naar de spelletjesportal (https://hopeisdope.github.io/): SVG-huisje rechtsboven op de
+  wereldkaart (`[data-portal]`, `presentation/screens/map.ts`), alleen daar. Navigatie in
+  `presentation/portal.ts` met `location.assign(location.origin + '/')` — de enige uitzondering op de
+  padregel (bewust geen `BASE_URL`). `app.ts` roept eerst `save()` aan. Korte indruk-animatie, niet
+  bij "Beperk beweging". Tests: `tests/portal.test.ts`, `e2e/portal.cjs` 6/6.
+
 ## Nog te observeren met het kind
+- Twee huisjes op de kaart (🏠 = terug naar start, SVG-huisje = alle spelletjes): verwarrend?
 - Terugspringen: begrijpelijk na het nieuwe voorbeeld? Vindt het kind ❓ als het vastzit?
 - Getallenlijn tot 20: tikt het op de (smalle) stenen of gebruikt het ⬅️/➡️?
 - Begrijpt het de kaart: slotje = nog dicht, ring/▶ = bezig, vinkje = klaar? Volgt het de uil?

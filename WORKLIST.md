@@ -26,9 +26,14 @@ Lees aan het begin van elke sessie; bijwerken wanneer iets klaar is of erbij kom
 - Getal zoeken is 'hetzelfde getal vinden'; hoor-naar-symbool alleen met spraak. Voldoende?
 - Vergelijken vraagt alleen "meer"; "minder" vraagt een symbool dat zonder lezen werkt. Nodig?
 - 🏠 stopt direct zonder bevestiging (voortgang wordt bewaard): per ongeluk tikken een probleem?
+- Wereldkaart heeft nu twee huisjes: 🏠 links (terug naar start) en het SVG-huisje rechts (naar de
+  spelletjesportal). Verwart dat het kind? Eventueel 🏠 op de kaart door een ander symbool vervangen.
 - Minimale iPadOS-versie van de doel-iPads? (nu uitgegaan van 15+)
 
 ## Klaar
+
+- [x] Thuisknop naar de spelletjesportal (root van de origin) op de wereldkaart: SVG-huisje,
+  bewaart voortgang vóór het weggaan; `tests/portal.test.ts` + `e2e/portal.cjs` 6/6 (2026-11-14)
 
 - [x] Fase 7: bruikbaarheidscontrole (zonder kind) — 🏠 tijdens vieren verloor de ronde, terugspringen
   zonder voorbeeld, voorraad als één tikdoel; bevindingen in BRUIKBAARHEID.md (2026-10-18)

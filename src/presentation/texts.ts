@@ -94,4 +94,6 @@ export function retry(rng: () => number = Math.random): string {
 export const DEMO_WATCH = 'Kijk, ik doe het voor!';
 export const DEMO_TRY = 'Nu jij!';
 export const PICK_MISSION = 'Tik op een plaatje om te spelen.';
+/** Alleen voor schermlezers (aria-label); het kind herkent het huisje. */
+export const PORTAL_LABEL = 'Naar alle spelletjes';
 export const PLAY = 'Tik op de grote knop om te spelen!';
